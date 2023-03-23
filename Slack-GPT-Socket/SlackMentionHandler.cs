@@ -149,6 +149,10 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
         });
     }
     
+    /// <summary>
+    ///     Posts a loading message to the Slack channel this ussualy shows when we are waiting for a long time.
+    /// </summary>
+    /// <param name="slackEvent"></param>
     private async Task PostLongWaitMessage(AppMention slackEvent)
     {
         await _slack.Chat.PostEphemeral(slackEvent.User, new Message
@@ -158,10 +162,25 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
             ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts
         });
     }
+    
+    /// <summary>
+    ///     Posts a loading message to the Slack channel this ussualy shows when we are waiting for a long time.
+    /// </summary>
+    /// <param name="slackEvent">Input slack event</param>
+    private async Task PostGptAvailableWarningMessage(AppMention slackEvent)
+    {
+        await _slack.Chat.PostEphemeral(slackEvent.User, new Message
+        {
+            Text = "OpenAI returned an error, that suggests high demand on servers. We will retry in your name a few times.",
+            Channel = slackEvent.Channel,
+            ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts
+        });
+    }
 
     /// <summary>
     ///     Generates a prompt using the GPT client.
     /// </summary>
+    /// <param name="slackEvent">Input slack event</param>
     /// <param name="context">The chat context to be used in generating the prompt.</param>
     /// <param name="userId">The user ID to be used in generating the prompt.</param>
     /// <returns>A GPTResponse instance containing the generated prompt.</returns>
@@ -170,8 +189,8 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
         // Start the periodic SendMessageProcessing task
         CancellationTokenSource cts = new CancellationTokenSource();
         Task periodicTask = PeriodicSendMessageProcessing(slackEvent, cts.Token);
-        
-        var result = await _gptClient.GeneratePrompt(context, userId);
+
+        var result = await GeneratePromptRetry(slackEvent, context, userId);
         
         // Cancel the periodic task once the long running method returns
         cts.Cancel();
@@ -188,7 +207,43 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
 
         return result;
     }
-    
+
+    /// <summary>
+    ///     Generates a prompt using the GPT client, and retries if the server is busy.
+    /// </summary>
+    /// <param name="slackEvent">Input slack event</param>
+    /// <param name="context">The chat context to be used in generating the prompt.</param>
+    /// <param name="userId">The user ID to be used in generating the prompt.</param>
+    /// <returns>A GPTResponse instance containing the generated prompt.</returns>
+    private async Task<GptResponse> GeneratePromptRetry(AppMention slackEvent, List<WritableChatPrompt> context, string userId)
+    {
+        var errorsCount = 0;
+        while (true)
+        {
+            var result = await _gptClient.GeneratePrompt(context, userId);
+
+            if (HasError(result) && result.Error!.Contains("The server had an error while processing your request. Sorry about that"))
+            {
+                if (errorsCount == 0)
+                {
+                    await PostGptAvailableWarningMessage(slackEvent);
+                }
+                errorsCount++;
+                if (errorsCount == 5)
+                {
+                    return result;
+                }
+                
+                // Wait 2 seconds times the number of errors
+                await Task.Delay(TimeSpan.FromSeconds(2 * errorsCount));
+            }
+            else
+            {
+                return result;
+            }
+        }
+    }
+
     /// <summary>
     ///     Periodically calls SendMessageProcessing() every 100 seconds.
     /// </summary>
