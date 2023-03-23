@@ -71,10 +71,15 @@ dotnet run --project Slack-GPT-Socket
 3. Mention the bot in a message and ask a question. The bot will respond with an answer. You can keep mentioning the bot
    in the same thread to continue the conversation.
 
+You can start your message with the name of the model without parameters eg:
+> @GPT-4 turbo How are you today? 
+
+Will use gpt-3.5-turbo instead of the default gpt-4 model. See GptClient for more aliases.
+
 ### Parameters
 **FAQ: Fine-tuning requests using parameters**
 
-**Q1: How do I use the parameters provided in the code?**
+**Q1: How do I use the parameters?**
 
 A1: You can use these parameters at the beginning of your request to fine-tune the model's output. To utilize them, pass
 the desired parameter name followed by its value. For example: `-maxTokens 50`. The request should be followed by your
