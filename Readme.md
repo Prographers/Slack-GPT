@@ -11,6 +11,7 @@ machine.
 - Maintain conversation context in a threaded format
 - Socket mode integration with Slack
 - Splits long messages into multiple messages, and doesn't break the code block formatting
+- Parameters for controlling the bot's behavior
 - Docker support
 
 ## Dependencies
@@ -70,7 +71,71 @@ dotnet run --project Slack-GPT-Socket
 3. Mention the bot in a message and ask a question. The bot will respond with an answer. You can keep mentioning the bot
    in the same thread to continue the conversation.
 
+### Parameters
+**FAQ: Fine-tuning requests using parameters**
+
+**Q1: How do I use the parameters provided in the code?**
+
+A1: You can use these parameters at the beginning of your request to fine-tune the model's output. To utilize them, pass
+the desired parameter name followed by its value. For example: `-maxTokens 50`. The request should be followed by your
+output. eg:
+
+> @GPT-4 -maxTokens 50 How are you today?
+
+Please note that the parameters should be separated by a space. Should be at the beginning of the request. Right after
+the bot's name. And should be followed by a space. For parameters that have spaces in them `"`.
+
+**Q2: What does the `-maxTokens` parameter do?**
+
+A2: The `-maxTokens` parameter limits the number of tokens (words or word segments) in the generated output. You can set
+this value by passing an integer to the parameter. Example usage: `-maxTokens 100`. Default is 2048 tokens. GPT-3.5 has a
+limit of 4000 and GPT-4 has a limit of 8000 tokens.
+
+**Q3: How does the `-temperature` parameter work?**
+
+A3: The `-temperature` parameter controls the randomness of the model's output. Higher values (e.g., 1.0) make the output
+more random, while lower values (e.g., 0.1) make it more deterministic. You can set this value by passing a float to the
+parameter. Example usage: `-temperature 0.7`. Default is 0.7
+
+**Q4: What is the `-topP` parameter?**
+
+A4: The `-topP` parameter (also known as "nucleus sampling") filters the model's token choices based on cumulative
+probability. You can set this value by passing a float between 0 and 1 to the parameter. Lower values make the output
+more focused, while higher values allow for more diversity. Example usage: `-topP 0.9`. Default is 1.
+
+**Q5: How do I use the `-presencePenalty` parameter?**
+
+A5: The `-presencePenalty` parameter penalizes tokens that are already present in the generated text. A higher value
+discourages repetition, while a lower value allows for more repetition. You can set this value by passing a float to the
+parameter. Example usage: `-presencePenalty 0.5`. Default is 0.
+
+**Q6: What does the `-frequencyPenalty` parameter do?**
+
+A6: The `-frequencyPenalty` parameter discourages the use of tokens that appear frequently in the training data. A higher
+value will make the output more creative, while a lower value will make it more common. You can set this value by
+passing a float to the parameter. Example usage: `-frequencyPenalty 0.3`. Default is 0.
+
+**Q7: What is the -model parameter?**
+
+A7: The -model parameter allows you to specify the name of the model you want to use for generating the output. You can
+set this value by passing a string to the parameter. Example usage: `-model "gpt-3.5-turbo"`. Default is gpt-4.
+Available models:
+ - gpt-4
+ - gpt-3.5-turbo
+
+**Q8: How do I use the -system parameter?**
+
+A8: The -system parameter lets you specify the system message that the model should use. The default message is "You are
+a helpful assistant. Today is {Current Date}", but you can use anything you want. Eg
+> @GPT-4 -system "You are a Math tutor, your task is to help but not to provide answers so that the student can think
+for themselves." I don't know how mutch is 37 * 12, please give me an answer.
+
+## Docker
+
+TODO
+
 ## Screenshot
+
 Notification messages!
 ![Chat Example](.gitContent/chatExample.png)
 _________________________
