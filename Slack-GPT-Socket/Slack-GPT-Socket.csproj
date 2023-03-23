@@ -20,4 +20,16 @@
       <PackageReference Include="SlackNet.AspNetCore" Version="0.10.22" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Slack-GPT-Socket\bin\Debug\net7.0\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="Slack-GPT-Socket\bin\Debug\net7.0\appsettings.Example.json" />
+      <_ContentIncludedByDefault Remove="Slack-GPT-Socket\bin\Debug\net7.0\appsettings.json" />
+      <_ContentIncludedByDefault Remove="Slack-GPT-Socket\bin\Debug\net7.0\Slack-GPT-Socket.deps.json" />
+      <_ContentIncludedByDefault Remove="Slack-GPT-Socket\bin\Debug\net7.0\Slack-GPT-Socket.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="Slack-GPT-Socket\obj\Debug\net7.0\staticwebassets.build.json" />
+      <_ContentIncludedByDefault Remove="Slack-GPT-Socket\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="Slack-GPT-Socket\obj\project.packagespec.json" />
+      <_ContentIncludedByDefault Remove="Slack-GPT-Socket\obj\Slack-GPT-Socket.csproj.nuget.dgspec.json" />
+    </ItemGroup>
+
 </Project>

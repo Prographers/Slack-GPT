@@ -177,7 +177,14 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
         cts.Cancel();
 
         // Ensure the periodic task has completed before proceeding
-        await periodicTask;
+        try
+        {
+            await periodicTask;
+        }
+        catch (TaskCanceledException)
+        {
+            // Ignore CTS CancelledException
+        }
 
         return result;
     }
