@@ -1,0 +1,4 @@
+version: '3.6'
+services:
+  slack-gpt:
+    image: slack-gpt:latest
