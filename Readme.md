@@ -137,7 +137,25 @@ for themselves." I don't know how mutch is 37 * 12, please give me an answer.
 
 ## Docker
 
-TODO
+You can start the docker container with the following command:
+
+```bash
+docker run -v ./appsettings.json:/app/appsettings.json --restart always ghcr.io/prographers/slack-gpt:latest
+```
+
+You can also use the `docker-compose.yml` file to start the container, detached. Docker Compose will automatically pull
+the image from the GitHub Container Registry, and start the container when that happens. It will use watchtower to do that.
+
+```bash
+docker-compose up -d
+```
+
+Please remember to put the appsettings.json file in the same directory as the command for both cases.
+
+### Security
+
+Both images are not exposed on any port, and cannot be accessed from the outside. The only way to access the container is
+through the Slack API. The container is also running as a non-root user, and has no access to the host system.
 
 ## Screenshot
 

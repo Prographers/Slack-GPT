@@ -1,4 +1,20 @@
+# Example docker-compose.yml for slack-gpt with watchtower for auto-updates
 version: '3.6'
 services:
   slack-gpt:
-    image: slack-gpt:latest
+    image: ghcr.io/prographers/slack-gpt:latest
+    container_name: slack-gpt
+    restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.scope=slack-gpt"
+    volumes:
+      - ./appsettings.json:/app/appsettings.json
+
+  watchtower-slack-gpt:
+    image: containrrr/watchtower
+    container_name: watchtower-slack-gpt
+    restart: always
+    volumes:
+      - /root/.docker/config.json:/config.json
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup --interval 30 --scope slack-gpt
