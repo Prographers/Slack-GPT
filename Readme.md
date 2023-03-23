@@ -67,6 +67,8 @@ steps to set up the necessary permissions:
 dotnet run --project Slack-GPT-Socket
 ```
 
+or see #Docker for more information on how to host it.
+
 2. Invite the bot to your desired Slack channel.
 3. Mention the bot in a message and ask a question. The bot will respond with an answer. You can keep mentioning the bot
    in the same thread to continue the conversation.
