@@ -74,7 +74,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VERSION=${{ steps.meta.outputs.tags }}
+            VERSION=${{ github.ref }}
 
 
       # Sign the resulting Docker image digest except on PRs.
