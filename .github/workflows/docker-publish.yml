@@ -71,8 +71,10 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
-            const latestTag = tags.data[0].name;
-            return latestTag;
+            const latestTag = tags.data[0].name.replace(/^v/, '');
+            const buildNumber = context.runNumber;
+            const versionWithBuildNumber = `${latestTag}.${buildNumber}`;
+            return versionWithBuildNumber;
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
