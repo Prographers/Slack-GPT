@@ -63,7 +63,7 @@ jobs:
             type=ref,event=tag
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}
+            type=semver,pattern={{version}},value=0.0.0
             type=sha
 
       # Build and push Docker image with Buildx (don't push on PR)
@@ -79,7 +79,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VERSION=${{ steps.meta.outputs.version || '0.0.0' }}
+            VERSION=${{ steps.meta.outputs.version }}
 
 
       # Sign the resulting Docker image digest except on PRs.
