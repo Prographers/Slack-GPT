@@ -92,7 +92,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VERSION="${{ steps.latesttag.outputs.result }}"
+            VERSION='${{ steps.latesttag.outputs.result }}'
 
 
       # Sign the resulting Docker image digest except on PRs.
