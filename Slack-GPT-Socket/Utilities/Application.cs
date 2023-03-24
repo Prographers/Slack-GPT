@@ -16,4 +16,6 @@ public class Application
     }
 
     public static Version Version { get; }
+    
+    public static string VersionString => $"v{Version.Major}.{Version.Minor}.{Version.Build}";
 }
