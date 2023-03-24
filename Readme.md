@@ -39,6 +39,14 @@ cd Slack-GPT
 dotnet restore
 ```
 
+## Getting OpenAI Api Key
+
+1. Go to [OpenAI Dashboard](https://platform.openai.com/account/api-keys)
+2. Click on "Create new secret key" button.
+3. Copy the secret and put it into the `OpenAIKey` variable in `appsettings.json`.
+
+NOTE: Using the OpenAI API requires a paid/trial account. You can find more information about pricing [here](https://openai.com/pricing/).
+
 ## Configuring Permissions in Slack
 
 Before you can run the Slack GPT Bot, you need to configure the appropriate permissions for your Slack bot. Follow these
