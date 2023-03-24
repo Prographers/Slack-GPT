@@ -5,6 +5,8 @@ implementation
 is based on Slack Sockets API, which means there is no need to host the bot on a server. The bot can be run on any
 machine.
 
+Did you like this tool? Give us a visit :) [https://prographers.com/](https://prographers.com/?utm_source=github&utm_medium=link&utm_campaign=readme&utm_content=like)
+
 ## Features
 
 - Integrate with OpenAI's GPT-4 to answer questions
