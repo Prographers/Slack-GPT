@@ -2,5 +2,6 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e72966db_002D060a_002D4577_002D858b_002D3601c1cb06de/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ContextBlockSanitation_OK" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.TestContextBlockSanitation.ContextBlockSanitation_OK&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.TestApplicationClass.TestApplicationVersion_Ok&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

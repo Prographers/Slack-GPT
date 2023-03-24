@@ -45,7 +45,7 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
 
             if (HasError(text))
             {
-                await PostErrorEphemeralMessage(slackEvent, text.Error);
+                await PostErrorEphemeralMessage("GptClient",slackEvent, text.Error);
                 return;
             }
 
@@ -53,11 +53,11 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
         }
         catch (SlackException e)
         {
-            await PostErrorEphemeralMessage(slackEvent, e.Message, string.Join("\n\t", e.ErrorMessages));
+            await PostErrorEphemeralMessage("SlackException" ,slackEvent, e.Message, string.Join("\n\t", e.ErrorMessages));
         }
         catch (Exception e)
         {
-            await PostErrorEphemeralMessage(slackEvent, e.Message, e.StackTrace);
+            await PostErrorEphemeralMessage("Unexpected", slackEvent, e.Message, e.StackTrace);
         }
     }
 
@@ -277,11 +277,11 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
     /// <param name="slackEvent">The AppMention event.</param>
     /// <param name="errorMessage">The error message to post.</param>
     /// <param name="details">Optional additional details about the error.</param>
-    private async Task PostErrorEphemeralMessage(AppMention slackEvent, string errorMessage, string? details = null)
+    private async Task PostErrorEphemeralMessage(string source, AppMention slackEvent, string errorMessage, string? details = null)
     {
         await _slack.Chat.PostEphemeral(slackEvent.User, new Message
         {
-            Text = $":rotating_light: {errorMessage} :rotating_light: \n\t{(details != null ? $"\n\t{details}" : "")}",
+            Text = $":rotating_light: [{source}] {errorMessage} :rotating_light: \n\t{(details != null ? $"\n\t{details}" : "")}",
             Channel = slackEvent.Channel,
             ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts
         });
@@ -344,7 +344,8 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
                 new Markdown($"by <@{slackEvent.User}> " +
                              $"using {text.Model} " +
                              $"in {text.ProcessingTime:hh':'mm':'ss} " +
-                             $"with {text.Usage?.TotalTokens.ToString() ?? "undefined"} tokens")
+                             $"with {text.Usage?.TotalTokens.ToString() ?? "undefined"} tokens " +
+                             $"(${Application.Version:v0.0.0})")
             }
         });
         await _slack.Chat.PostMessage(new Message

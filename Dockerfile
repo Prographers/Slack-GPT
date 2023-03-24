@@ -8,11 +8,15 @@ WORKDIR /src
 COPY ["Slack-GPT-Socket/Slack-GPT-Socket.csproj", "Slack-GPT-Socket/"]
 RUN dotnet restore "Slack-GPT-Socket/Slack-GPT-Socket.csproj"
 COPY . .
+
+# Set the version as a build argument
+ARG VERSION=1.0.0
+
 WORKDIR "/src/Slack-GPT-Socket"
-RUN dotnet build "Slack-GPT-Socket.csproj" -c Release -o /app/build
+RUN dotnet build "Slack-GPT-Socket.csproj" -c Release -o /app/build --version-suffix $VERSION
 
 FROM build AS publish
-RUN dotnet publish "Slack-GPT-Socket.csproj" -c Release -o /app/publish
+RUN dotnet publish "Slack-GPT-Socket.csproj" -c Release -o /app/publish --version-suffix $VERSION
 
 FROM base AS final
 WORKDIR /app

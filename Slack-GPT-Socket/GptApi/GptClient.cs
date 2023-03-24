@@ -34,7 +34,11 @@ public class GptClient
     /// <param name="settings">The API settings.</param>
     public GptClient(ILogger<GptClient> log, IOptions<ApiSettings> settings)
     {
-        _api = new OpenAIClient(settings.Value.OpenAIKey);
+        var httpClient = new HttpClient()
+        {
+            Timeout = TimeSpan.FromMinutes(10),
+        };
+        _api = new OpenAIClient(settings.Value.OpenAIKey, OpenAIClientSettings.Default, httpClient);
         _log = log;
     }
 
