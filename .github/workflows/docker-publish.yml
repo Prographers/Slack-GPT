@@ -74,7 +74,8 @@ jobs:
             const latestTag = tags.data[0].name.replace(/^v/, '');
             const buildNumber = context.runNumber;
             const versionWithBuildNumber = `${latestTag}.${buildNumber}`;
-            return versionWithBuildNumber;
+            const versionWithoutQuotes = versionWithBuildNumber.replace(/"/g, '');
+            return versionWithoutQuotes;
             
       - name: Display current tag
         run: echo "Current tag is ${{ steps.latesttag.outputs.result }}"

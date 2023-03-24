@@ -345,7 +345,7 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
                              $"using {text.Model} " +
                              $"in {text.ProcessingTime:hh':'mm':'ss} " +
                              $"with {text.Usage?.TotalTokens.ToString() ?? "undefined"} tokens " +
-                             $"(${Application.Version:v0.0.0})")
+                             $"({Application.Version:v0.0.0})")
             }
         });
         await _slack.Chat.PostMessage(new Message
