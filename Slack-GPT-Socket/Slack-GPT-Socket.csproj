@@ -32,4 +32,10 @@
       <_ContentIncludedByDefault Remove="Slack-GPT-Socket\obj\Slack-GPT-Socket.csproj.nuget.dgspec.json" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="version.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

@@ -26,4 +26,6 @@ app.UseSlackBotInfo();
 
 app.MapGet("/", () => "Hello Slack!");
 
+Console.WriteLine(Application.VersionString);
+
 app.Run();
