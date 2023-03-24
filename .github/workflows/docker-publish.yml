@@ -78,7 +78,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VERSION=${{ CURRENT_TAG }}
+            VERSION=$CURRENT_TAG
 
 
       # Sign the resulting Docker image digest except on PRs.
