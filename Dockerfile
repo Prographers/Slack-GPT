@@ -18,9 +18,9 @@ RUN dotnet build "Slack-GPT-Socket.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "Slack-GPT-Socket.csproj" -c Release -o /app/publish
+RUN echo $APP_VERSION > /app/publish/version.txt
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-RUN echo $APP_VERSION > version.txt
 ENTRYPOINT ["dotnet", "Slack-GPT-Socket.dll"]
