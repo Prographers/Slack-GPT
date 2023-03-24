@@ -97,7 +97,7 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
             {
                 if (IsBotReply(reply))
                 {
-                    var response = reply.Text;
+                    var response = SlackParserUtils.RemoveContextBlockFromResponses(reply);
                     if (response != null) context.Add(new WritableChatPrompt("assistant", response));
                 }
                 else if (IsUserReply(reply))
@@ -114,6 +114,8 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
 
         return context;
     }
+
+
 
     /// <summary>
     ///     Checks if the given message is a reply from the bot.
@@ -313,23 +315,6 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
     }
 
     /// <summary>
-    ///     Converts a given text string into a list of blocks for Slack message formatting.
-    /// </summary>
-    /// <param name="text">The text string to be converted into blocks.</param>
-    /// <returns>A list of blocks containing the text converted into a section block.</returns>
-    private List<Block> ConvertTextToBlocks(string text)
-    {
-        var blocks = new List<Block>();
-
-        blocks.Add(new SectionBlock
-        {
-            Text = new Markdown(text)
-        });
-
-        return blocks;
-    }
-
-    /// <summary>
     ///     Posts a chunk of the GPT response message to the Slack channel.
     /// </summary>
     /// <param name="slackEvent">The AppMention event.</param>
@@ -338,7 +323,7 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
     {
         await _slack.Chat.PostMessage(new Message
         {
-            Blocks = ConvertTextToBlocks(text),
+            Blocks = SlackParserUtils.ConvertTextToBlocks(text),
             Channel = slackEvent.Channel,
             ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts
         });
@@ -351,7 +336,7 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
     /// <param name="text">The GPT response containing the message and context information to post.</param>
     private async Task PostSlackMessage(AppMention slackEvent, GptResponse text)
     {
-        var blocks = ConvertTextToBlocks(text.Message);
+        var blocks = SlackParserUtils.ConvertTextToBlocks(text.Message);
         blocks.Add(new ContextBlock
         {
             Elements = new[]

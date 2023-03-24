@@ -15,6 +15,7 @@ Did you like this tool? Give us a visit :) [https://prographers.com/](https://pr
 - Splits long messages into multiple messages, and doesn't break the code block formatting
 - Parameters for controlling the bot's behavior
 - Docker support
+- Full documentation
 
 ## Dependencies
 
