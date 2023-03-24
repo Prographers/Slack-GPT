@@ -13,7 +13,7 @@ COPY . .
 ARG VERSION=1.0.0
 
 # Remove double quotes from the VERSION argument
-RUN VERSION=$(echo $VERSION | tr -d '"') \
+RUN VERSION=$(echo $VERSION | tr -d '"')
 
 WORKDIR "/src/Slack-GPT-Socket"
 RUN dotnet build "Slack-GPT-Socket.csproj" -c Release -o /app/build --version-suffix $VERSION
