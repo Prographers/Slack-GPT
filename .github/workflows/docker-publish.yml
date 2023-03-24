@@ -74,10 +74,10 @@ jobs:
             const latestTag = tags.data[0].name.replace(/^v/, '');
             const buildNumber = context.runNumber;
             const versionWithBuildNumber = `${latestTag}.${buildNumber}`;
-            return versionWithBuildNumber;
+            return versionWithBuildNumber.replace(/"/g, '');
             
       - name: Display current tag
-        run: echo "Current tag is $steps.latesttag.outputs.result"
+        run: echo "Current tag is ${{ steps.latesttag.outputs.result }}"
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -92,7 +92,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VERSION=$steps.latesttag.outputs.result
+            VERSION=${{ steps.latesttag.outputs.result }}
 
 
       # Sign the resulting Docker image digest except on PRs.
