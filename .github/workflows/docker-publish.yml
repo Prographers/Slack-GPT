@@ -74,7 +74,7 @@ jobs:
             const latestTag = tags.data[0].name.replace(/^v/, '');
             const buildNumber = context.runNumber;
             const versionWithBuildNumber = `${latestTag}.${buildNumber}`;
-            return versionWithBuildNumber.replace(/"/g, '');
+            return versionWithBuildNumber;
             
       - name: Display current tag
         run: echo "Current tag is ${{ steps.latesttag.outputs.result }}"
@@ -92,7 +92,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VERSION=${{ steps.latesttag.outputs.result }}
+            VERSION="${{ steps.latesttag.outputs.result }}"
 
 
       # Sign the resulting Docker image digest except on PRs.
