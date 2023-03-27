@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Microsoft.Extensions.Options;
 using SlackNet;
 using SlackNet.Blocks;
 using SlackNet.Interaction;
@@ -15,14 +16,16 @@ public class SlackCommandHandler : ISlashCommandHandler
     private readonly GptCustomCommands _customCommands;
     private readonly SlackBotInfo _botInfo;
     private readonly ISlackApiClient _slack;
+    private readonly GptDefaults _gptDefaults;
     private readonly ILogger _log;
 
-    public SlackCommandHandler(GptCustomCommands customCommands, SlackBotInfo botInfo, ISlackApiClient slack,
+    public SlackCommandHandler(GptCustomCommands customCommands, SlackBotInfo botInfo, ISlackApiClient slack, IOptions<GptDefaults> gptDefaults,
         ILogger<SlackCommandHandler> log)
     {
         _customCommands = customCommands;
         _botInfo = botInfo;
         _slack = slack;
+        _gptDefaults = gptDefaults.Value;
         _log = log;
     }
 
@@ -78,14 +81,14 @@ public class SlackCommandHandler : ISlashCommandHandler
     {
         var sb = new StringBuilder();
         sb.AppendLine("Model parameters:");
-        sb.AppendLine("-maxTokens: limits tokens in output, default 2048 (GPT-3.5: 4000, GPT-4: 8000);");
-        sb.AppendLine("-temperature: controls randomness, default 0.7;");
-        sb.AppendLine("-topP: filters token choices, default 1;");
-        sb.AppendLine("-presencePenalty: penalizes repeated tokens, default 0;");
-        sb.AppendLine("-frequencyPenalty: discourages frequent tokens, default 0;");
-        sb.AppendLine("-model: specifies model, default GPT-4, options: GPT-4, GPT-3.5-turbo;");
+        sb.AppendLine($"-maxTokens: limits tokens in output, default {_gptDefaults.MaxTokens.ToString() ?? "4000"} (GPT-3.5: 4000, GPT-4: 8000);");
+        sb.AppendLine($"-temperature: controls randomness, default {_gptDefaults.Temperature.ToString() ?? "0.7"};");
+        sb.AppendLine($"-topP: filters token choices, default {_gptDefaults.TopP.ToString() ?? "1"};");
+        sb.AppendLine($"-presencePenalty: penalizes repeated tokens, default {_gptDefaults.PresencePenalty.ToString() ?? "0"};");
+        sb.AppendLine($"-frequencyPenalty: discourages frequent tokens, default {_gptDefaults.FrequencyPenalty.ToString() ?? "0"};");
+        sb.AppendLine($"-model: specifies model, default {(_gptDefaults.Model ?? "gpt-4").ToUpper()}, options: GPT-4, GPT-3.5-turbo;");
         sb.AppendLine(
-            "-system: custom system message, default \"You are a helpful assistant. Today is {Current Date}\".");
+            $"-system: custom system message, default \"{_gptDefaults.Model ?? "You are a helpful assistant. Today is {Current Date}"}\".");
 
         return sb.ToString();
     }
