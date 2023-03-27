@@ -81,12 +81,12 @@ public class SlackCommandHandler : ISlashCommandHandler
     {
         var sb = new StringBuilder();
         sb.AppendLine("Model parameters:");
-        sb.AppendLine($"-maxTokens: limits tokens in output, default {_gptDefaults.MaxTokens.ToString() ?? "4000"} (GPT-3.5: 4000, GPT-4: 8000);");
-        sb.AppendLine($"-temperature: controls randomness, default {_gptDefaults.Temperature.ToString() ?? "0.7"};");
-        sb.AppendLine($"-topP: filters token choices, default {_gptDefaults.TopP.ToString() ?? "1"};");
-        sb.AppendLine($"-presencePenalty: penalizes repeated tokens, default {_gptDefaults.PresencePenalty.ToString() ?? "0"};");
-        sb.AppendLine($"-frequencyPenalty: discourages frequent tokens, default {_gptDefaults.FrequencyPenalty.ToString() ?? "0"};");
-        sb.AppendLine($"-model: specifies model, default {(_gptDefaults.Model ?? "gpt-4").ToUpper()}, options: GPT-4, GPT-3.5-turbo;");
+        sb.AppendLine($"-maxTokens: limits tokens in output, default {_gptDefaults.MaxTokens?.ToString() ?? "4000"} (GPT-3.5: 4000, GPT-4: 8000);");
+        sb.AppendLine($"-temperature: controls randomness, default {_gptDefaults.Temperature?.ToString() ?? "0.7"};");
+        sb.AppendLine($"-topP: filters token choices, default {_gptDefaults.TopP?.ToString() ?? "1"};");
+        sb.AppendLine($"-presencePenalty: penalizes repeated tokens, default {_gptDefaults.PresencePenalty?.ToString() ?? "0"};");
+        sb.AppendLine($"-frequencyPenalty: discourages frequent tokens, default {_gptDefaults.FrequencyPenalty?.ToString() ?? "0"};");
+        sb.AppendLine($"-model: specifies model, default {(_gptDefaults.Model ?? "gpt-4").ToLower()}, options: gpt-4, gpt-3.5-turbo;");
         sb.AppendLine(
             $"-system: custom system message, default \"{_gptDefaults.Model ?? "You are a helpful assistant. Today is {Current Date}"}\".");
 
