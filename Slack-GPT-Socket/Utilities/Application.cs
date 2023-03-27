@@ -8,8 +8,11 @@ public class Application
     {
         // Read the version from version.txt
         var versionRaw = File.ReadAllText("version.txt");
-        var version = Version.TryParse(versionRaw.Trim('"', ' ', 'v'), out var versionParsed) ? versionParsed : null;
-        Version = version ?? new Version(1, 0, 0, 0);
+        if (!Version.TryParse(versionRaw.Trim('"', 'v').Trim(), out var versionParsed))
+        {
+            Console.WriteLine($"Failed to parse version.txt\n\"{versionRaw}\"");
+        }
+        Version = versionParsed ?? new Version(1, 0, 0, 0);
     }
 
     public static Version Version { get; }
