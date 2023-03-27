@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using SlackNet;
+using SlackNet.Blocks;
 using SlackNet.Interaction;
 using SlackNet.WebApi;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -38,7 +39,15 @@ public class SlackCommandHandler : ISlashCommandHandler
         if (command.Text.StartsWith("help"))
         {
             var commandName = command.Text.Substring(4).Trim();
-            if (_customCommands.TryResolveCommand(commandName, out var prompt)) return SlashCommandResponse(prompt);
+
+            if (_customCommands.TryResolveCommand(commandName, out var result))
+            {
+                var text = $"{result.Command} - {result.Description}\nPrompt:\n> {result.Prompt}" +
+                           $"\n\nIs executed as system command: {result.AsSystem}";
+                
+                return SlashCommandResponse(text);
+            }
+
             return SlashCommandResponse($"Command {commandName} not found.");
         }
 
@@ -54,7 +63,7 @@ public class SlackCommandHandler : ISlashCommandHandler
     private static string GetStatus()
     {
         var sb = new StringBuilder();
-        sb.AppendLine("I'm alive!");
+        sb.AppendLine("I'm Online!");
         sb.AppendLine();
         sb.AppendLine($"Version {Application.Version}");
 
@@ -67,7 +76,7 @@ public class SlackCommandHandler : ISlashCommandHandler
     /// <returns></returns>
     private string ModelParametersHelpText()
     {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         sb.AppendLine("Model parameters:");
         sb.AppendLine("-maxTokens: limits tokens in output, default 2048 (GPT-3.5: 4000, GPT-4: 8000);");
         sb.AppendLine("-temperature: controls randomness, default 0.7;");
@@ -75,7 +84,8 @@ public class SlackCommandHandler : ISlashCommandHandler
         sb.AppendLine("-presencePenalty: penalizes repeated tokens, default 0;");
         sb.AppendLine("-frequencyPenalty: discourages frequent tokens, default 0;");
         sb.AppendLine("-model: specifies model, default GPT-4, options: GPT-4, GPT-3.5-turbo;");
-        sb.AppendLine("-system: custom system message, default \"You are a helpful assistant. Today is {Current Date}\".");
+        sb.AppendLine(
+            "-system: custom system message, default \"You are a helpful assistant. Today is {Current Date}\".");
 
         return sb.ToString();
     }
@@ -112,7 +122,16 @@ public class SlackCommandHandler : ISlashCommandHandler
         {
             Message = new Message
             {
-                Text = text
+                Blocks = new[]
+                {
+                    new SectionBlock
+                    {
+                        Text = new Markdown
+                        {
+                            Text = text
+                        }
+                    }
+                }
             },
             ResponseType = ResponseType.Ephemeral
         };

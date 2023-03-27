@@ -15,6 +15,7 @@ public class GptClient
     private readonly OpenAIClient _api;
     private readonly GptCustomCommands _customCommands;
     private readonly ILogger _log;
+    private readonly GptDefaults _gptDefaults;
 
     /// <summary>
     ///     Initializes static members of the <see cref="GptClient" /> class.
@@ -34,7 +35,7 @@ public class GptClient
     /// <param name="customCommands">Custom commands handler</param>
     /// <param name="log">The logger instance.</param>
     /// <param name="settings">The API settings.</param>
-    public GptClient(GptCustomCommands customCommands, ILogger<GptClient> log, IOptions<ApiSettings> settings)
+    public GptClient(GptCustomCommands customCommands, ILogger<GptClient> log, IOptions<GptDefaults> gptDefaults, IOptions<ApiSettings> settings)
     {
         var httpClient = new HttpClient()
         {
@@ -43,6 +44,7 @@ public class GptClient
         _api = new OpenAIClient(settings.Value.OpenAIKey, OpenAIClientSettings.Default, httpClient);
         _customCommands = customCommands;
         _log = log;
+        _gptDefaults = gptDefaults.Value;
     }
 
     /// <summary>
@@ -55,18 +57,16 @@ public class GptClient
     {
         // get the last prompt
         var userPrompt = chatPrompts.Last(chatPrompt => chatPrompt.Role == "user");
-        var prompt = new GptRequest
-        {
-            UserId = userId,
-            Prompt = userPrompt.Content
-        };
+        var prompt = GptRequest.Default(_gptDefaults);
+        prompt.UserId = userId;
+        prompt.Prompt = userPrompt.Content;
 
         var chatRequest = ParseRequest(chatPrompts, prompt);
 
         try
         {
             var result = await _api.ChatEndpoint.GetCompletionAsync(chatRequest);
-            _log.LogInformation("GPT-3 response: {Response}", result.FirstChoice);
+            _log.LogInformation("GPT response: {Response}", result.FirstChoice);
 
             return new GptResponse
             {
@@ -96,7 +96,8 @@ public class GptClient
     {
         foreach (var chatPrompt in chatPrompts)
         {
-            var content = new GptRequest { Prompt = chatPrompt.Content };
+            var content = GptRequest.Default(_gptDefaults);
+            content.Prompt = chatPrompt.Content;
             ResolveModel(ref content);
             ResolveParameters(ref content);
             chatPrompt.Content = content.Prompt;
@@ -106,12 +107,12 @@ public class GptClient
         ResolveParameters(ref request);
 
         WritableChatPrompt system;
-        if (request.System != null)
-            system = new WritableChatPrompt("system", request.System);
+        if (request.System.ShoudReplace)
+            system = new WritableChatPrompt("system", request.System.Build());
         else
         {
             system = new WritableChatPrompt("system",
-                $"You are a helpful assistant. Today is {DateTime.Now:yyyy-MM-ddTHH:mm:ssZ}");
+                $"You are a helpful assistant. Today is {DateTime.Now:yyyy-MM-ddTHH:mm:ssZ} " + request.System.Build());
         }
 
         var requestPrompts = new List<WritableChatPrompt>();
@@ -162,9 +163,13 @@ public class GptClient
             }
         }
 
-        if (!modelFound)
+        if (modelFound) return;
+        
+        var inputModel = input.Model;
+        // check if current model is valid
+        if (Models.All(modelInfo => modelInfo.Model != inputModel))
         {
-            // if no match is found, set model property of input to the model of the first item in the models array
+            // if not, set model property of input to the model of the first item in the models array
             input.Model = Models[0].Model;
         }
     }
@@ -187,14 +192,7 @@ public class GptClient
             var paramValueTrim = match.Groups[2]?.Value.Trim() ?? string.Empty;
             var paramValue = paramValueTrim.Trim('"');
 
-            var paramNameIndex = inputPrompt.IndexOf(paramName, StringComparison.InvariantCultureIgnoreCase);
-            var paramEndIndex = paramNameIndex + paramName.Length + paramValueTrim.Length + 2;
-
-            if (lastIndex + 5 < paramNameIndex) break;
-
-            lastIndex = paramEndIndex;
-            input.Prompt = input.Prompt.Replace(paramName + " " + paramValueTrim, "").Trim();
-
+            bool hasValue = true;
             try
             {
                 switch (paramName)
@@ -218,12 +216,20 @@ public class GptClient
                         input.Model = paramValue.ToLowerInvariant();
                         break;
                     case "-system":
-                        input.System = paramValue;
+                        input.System.Replace(paramValue);
                         break;
                     default:
                         if (_customCommands.TryResolveCommand(paramName, out var prompt))
                         {
-                            input.Prompt = prompt + "\n" + input.Prompt;
+                            if (prompt.AsSystem)
+                            {
+                                input.System.Append(prompt!.Prompt);
+                            }
+                            else
+                            {
+                                input.Prompt = prompt!.Prompt + "\n" + input.Prompt;
+                            }
+                            hasValue = false;
                         }
                         else
                         {
@@ -231,6 +237,28 @@ public class GptClient
                         }
                         break;
                 }
+                
+                // Trim the input Prompt to remove the parameter,
+                // update last index to check if we've reached the end of the parameters
+                int paramNameIndex = inputPrompt.IndexOf(paramName, StringComparison.InvariantCultureIgnoreCase);
+            
+                int paramEndIndex;
+                string searchString;
+                if (hasValue)
+                {
+                    paramEndIndex = paramNameIndex + paramName.Length + paramValueTrim.Length + 2;
+                    searchString = paramName + " " + paramValueTrim;
+                }
+                else
+                {
+                    paramEndIndex = paramNameIndex + paramName.Length + 2;
+                    searchString = paramName + " ";
+                }
+
+                if (lastIndex + 5 < paramNameIndex) break;
+
+                lastIndex = paramEndIndex;
+                input.Prompt = input.Prompt.Replace(searchString, "").Trim();
             }
             catch (Exception e)
             {

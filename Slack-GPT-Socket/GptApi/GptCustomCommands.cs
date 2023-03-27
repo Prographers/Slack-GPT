@@ -21,18 +21,17 @@ public class GptCustomCommands
     ///     Checks if the command is a custom command and returns the prompt if it is.
     /// </summary>
     /// <param name="command">Command to resolve</param>
-    /// <param name="prompt">Prompt to add to the request</param>
+    /// <param name="result">GptCommand object</param>
     /// <returns>True if found</returns>
-    public bool TryResolveCommand(string command, out string prompt)
+    public bool TryResolveCommand(string command, out GptCommand? result)
     {
-        prompt = string.Empty;
+        result = null;
         foreach (var gptCommand in _gptCommands.CurrentValue.Commands)
         {
-            if (gptCommand.Command == command)
-            {
-                prompt = gptCommand.Prompt;
-                return true;
-            }
+            if (gptCommand.Command != command) continue;
+            
+            result = gptCommand;
+            return true;
         }
 
         return false;
