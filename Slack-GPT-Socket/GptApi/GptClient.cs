@@ -13,6 +13,7 @@ public class GptClient
     private static readonly ModelInfo[] Models;
 
     private readonly OpenAIClient _api;
+    private readonly GptCustomCommands _customCommands;
     private readonly ILogger _log;
 
     /// <summary>
@@ -30,15 +31,17 @@ public class GptClient
     /// <summary>
     ///     Initializes a new instance of the <see cref="GptClient" /> class.
     /// </summary>
+    /// <param name="customCommands">Custom commands handler</param>
     /// <param name="log">The logger instance.</param>
     /// <param name="settings">The API settings.</param>
-    public GptClient(ILogger<GptClient> log, IOptions<ApiSettings> settings)
+    public GptClient(GptCustomCommands customCommands, ILogger<GptClient> log, IOptions<ApiSettings> settings)
     {
         var httpClient = new HttpClient()
         {
             Timeout = TimeSpan.FromMinutes(10),
         };
         _api = new OpenAIClient(settings.Value.OpenAIKey, OpenAIClientSettings.Default, httpClient);
+        _customCommands = customCommands;
         _log = log;
     }
 
@@ -170,7 +173,7 @@ public class GptClient
     ///     Resolves additional parameters for the given input.
     /// </summary>
     /// <param name="input">The GPT request input.</param>
-    public static void ResolveParameters(ref GptRequest input)
+    public void ResolveParameters(ref GptRequest input)
     {
         var parameterRegex = new Regex(@"(-\w+)((\s+""[^""]+"")|\s+\S+)?");
         var inputPrompt = input.Prompt;
@@ -192,32 +195,47 @@ public class GptClient
             lastIndex = paramEndIndex;
             input.Prompt = input.Prompt.Replace(paramName + " " + paramValueTrim, "").Trim();
 
-            switch (paramName)
+            try
             {
-                case "-maxTokens":
-                    input.MaxTokens = int.Parse(paramValue);
-                    break;
-                case "-temperature":
-                    input.Temperature = float.Parse(paramValue);
-                    break;
-                case "-topP":
-                    input.TopP = float.Parse(paramValue);
-                    break;
-                case "-presencePenalty":
-                    input.PresencePenalty = float.Parse(paramValue);
-                    break;
-                case "-frequencyPenalty":
-                    input.FrequencyPenalty = float.Parse(paramValue);
-                    break;
-                case "-model":
-                    input.Model = paramValue;
-                    break;
-                case "-system":
-                    input.System = paramValue;
-                    break;
-                default:
-                    Console.WriteLine($"Unrecognized parameter: {paramName}");
-                    break;
+                switch (paramName)
+                {
+                    case "-maxTokens":
+                        input.MaxTokens = int.Parse(paramValue);
+                        break;
+                    case "-temperature":
+                        input.Temperature = float.Parse(paramValue);
+                        break;
+                    case "-topP":
+                        input.TopP = float.Parse(paramValue);
+                        break;
+                    case "-presencePenalty":
+                        input.PresencePenalty = float.Parse(paramValue);
+                        break;
+                    case "-frequencyPenalty":
+                        input.FrequencyPenalty = float.Parse(paramValue);
+                        break;
+                    case "-model":
+                        input.Model = paramValue.ToLowerInvariant();
+                        break;
+                    case "-system":
+                        input.System = paramValue;
+                        break;
+                    default:
+                        if (_customCommands.TryResolveCommand(paramName, out var prompt))
+                        {
+                            input.Prompt = prompt + "\n" + input.Prompt;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Unrecognized parameter: {paramName}");
+                        }
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                // if we get an exception, we'll just ignore the parameter and move on
+                break;
             }
 
             inputPrompt = input.Prompt;

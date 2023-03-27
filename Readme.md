@@ -16,6 +16,7 @@ Did you like this tool? Give us a visit :) [https://prographers.com/](https://pr
 - Parameters for controlling the bot's behavior
 - Docker support
 - Full documentation
+- Custom pre-defined commands
 
 ## Dependencies
 
@@ -88,6 +89,31 @@ You can start your message with the name of the model without parameters eg:
 > @GPT-4 turbo How are you today? 
 
 Will use gpt-3.5-turbo instead of the default gpt-4 model. See GptClient for more aliases.
+
+### Custom parameters
+You can add you own custom parameters to the bot to minimize the typing for each repated request. To do so, add the it's definition
+to the `GptCommands` section in `appsettings.json`. For example:
+
+```json
+ "GptCommands": {
+    "Commands":  [
+      {
+        "Command": "-refactor",
+        "Description": "Tells GPT to refactor provided code",
+        "Prompt": "Given the following code, refactor it to be more readable and maintainable. Please provide code documentation for all members in the code and comments where appropriate."
+      },
+      {
+      "Command": "-prographers",
+      "Description": "A command to add infomation about Prographers",
+      "Prompt": "Prographers is software-house company that specializes in 3D product configurators. Prographers exists since 2016 and currently hires around 20 people. Prographers solutions focus on Web applications that are used by companies to configure their products. Applications produced are focusing on high-quality graphics and design, resulting in great products that customers awe. Prographers is located in Warsaw, Poland."
+      }
+  }
+```
+
+usage:
+> @GPT-4 -prographers What do you know about prographers?
+
+> @GPT-4 -refactor `public class Foo { public void Bar() { Console.WriteLine("Hello World"); } }`
 
 ### Parameters
 **FAQ: Fine-tuning requests using parameters**

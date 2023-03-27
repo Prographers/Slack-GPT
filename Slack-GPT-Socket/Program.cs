@@ -3,10 +3,13 @@ using SlackNet.AspNetCore;
 using SlackNet.Events;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var settings = builder.Configuration.GetSection("Api").Get<ApiSettings>()!;
 builder.Services.AddOptions<ApiSettings>().Bind(builder.Configuration.GetSection("Api"));
+builder.Services.Configure<GptCommands>(builder.Configuration.GetSection("GptCommands"));
 
 builder.Services.AddSingleton<GptClient>();
+builder.Services.AddSingleton<GptCustomCommands>();
 
 builder.Services.AddSlackNet(c => c
     .UseApiToken(settings.SlackBotToken)
