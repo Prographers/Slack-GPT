@@ -193,6 +193,7 @@ public class GptClient
             var paramValue = paramValueTrim.Trim('"');
 
             bool hasValue = true;
+            bool shouldBreak = false;
             try
             {
                 switch (paramName)
@@ -234,9 +235,12 @@ public class GptClient
                         else
                         {
                             Console.WriteLine($"Unrecognized parameter: {paramName}");
+                            shouldBreak = true;
                         }
                         break;
                 }
+                
+                if(shouldBreak) break;
                 
                 // Trim the input Prompt to remove the parameter,
                 // update last index to check if we've reached the end of the parameters
