@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
+using Slack_GPT_Socket.Settings;
 
-namespace Slack_GPT_Socket;
+namespace Slack_GPT_Socket.GptApi;
 
 /// <summary>
 ///     Custom pre-defined commands for the bot. These are defined in the appsettings.json file. 
@@ -28,7 +29,7 @@ public class GptCustomCommands
         result = null;
         foreach (var gptCommand in _gptCommands.CurrentValue.Commands)
         {
-            if (gptCommand.Command != command) continue;
+            if (!string.Equals(gptCommand.Command, command, StringComparison.CurrentCultureIgnoreCase)) continue;
             
             result = gptCommand;
             return true;
@@ -36,6 +37,11 @@ public class GptCustomCommands
 
         return false;
     }
+    
+    /// <summary>
+    ///     Returns the custom commands.
+    /// </summary>
+    public GptCommands Commands => _gptCommands.CurrentValue;
 
     /// <summary>
     ///     Returns a string containing all the custom commands and their descriptions.

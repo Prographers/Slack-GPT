@@ -1,4 +1,4 @@
-﻿namespace Slack_GPT_Socket;
+﻿namespace Slack_GPT_Socket.GptApi;
 
 /// <summary>
 ///     Represents a system message builder
@@ -18,7 +18,14 @@ public class GptSystemMessageBuilder
     /// <summary>
     ///     Should we replace the system message with list of messages?
     /// </summary>
-    public bool ShoudReplace { get; private set; }
+    public bool ShouldReplace { get; private set; }
+    
+    /// <summary>
+    ///     Context message is treated as a system message, that is carried over to the next request.
+    ///     Those can be overwritten by the next manual system request, or by the next context message.
+    ///     After the next manual system request, the context message is kept until cleared manually.
+    /// </summary>
+    public bool IsContextMessage { get; set; }
 
     /// <summary>
     ///     Adds a system message to the list.
@@ -36,7 +43,7 @@ public class GptSystemMessageBuilder
     public void Replace(string message)
     {
         _messages.Add(message);
-        ShoudReplace = true;
+        ShouldReplace = true;
     }
 
     /// <summary>

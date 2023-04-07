@@ -62,4 +62,16 @@ public static class StringUtils
 
         return result;
     }
+
+    /// <summary>
+    ///     Sanitizes a string to only contain numbers and symbols.
+    /// </summary>
+    /// <param name="input">String input that should be parsed as number eventualy</param>
+    /// <returns></returns>
+    public static string SanitizeNumber(this string input)
+    {
+        return string.Join("", input.Where(x => char.IsDigit(x) || char.IsSymbol(x) 
+                        || char.IsPunctuation(x) || char.IsSeparator(x))).Replace(",", ".");
+    }
+    
 }

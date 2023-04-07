@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Options;
+using Slack_GPT_Socket.GptApi;
+using Slack_GPT_Socket.Settings;
 using SlackNet;
 using SlackNet.Blocks;
 using SlackNet.Interaction;

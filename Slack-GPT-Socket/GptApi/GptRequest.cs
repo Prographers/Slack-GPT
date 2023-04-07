@@ -1,4 +1,6 @@
-﻿namespace Slack_GPT_Socket;
+﻿using Slack_GPT_Socket.Settings;
+
+namespace Slack_GPT_Socket.GptApi;
 
 /// <summary>
 ///     Represents a request to the ChatGPT API.

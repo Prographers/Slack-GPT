@@ -1,4 +1,5 @@
-﻿using SlackNet;
+﻿using Slack_GPT_Socket.GptApi;
+using SlackNet;
 using SlackNet.Blocks;
 using SlackNet.Events;
 using SlackNet.WebApi;

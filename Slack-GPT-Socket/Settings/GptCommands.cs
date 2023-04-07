@@ -1,4 +1,4 @@
-﻿namespace Slack_GPT_Socket;
+﻿namespace Slack_GPT_Socket.Settings;
 
 /// <summary>
 ///     Custom pre-defined commands for the bot.
@@ -8,5 +8,5 @@ public class GptCommands
     /// <summary>
     ///     The custom commands.
     /// </summary>
-    public List<GptCommand> Commands { get; set; }
+    public List<GptCommand> Commands { get; set; } = new();
 }

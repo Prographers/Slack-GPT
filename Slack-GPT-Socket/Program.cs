@@ -1,4 +1,6 @@
 using Slack_GPT_Socket;
+using Slack_GPT_Socket.GptApi;
+using Slack_GPT_Socket.Settings;
 using SlackNet.AspNetCore;
 using SlackNet.Events;
 
