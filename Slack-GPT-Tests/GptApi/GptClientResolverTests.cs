@@ -277,4 +277,108 @@ public class GptClientResolverTests
         else
             chatRequest.Messages[1].Content.Should().Be(commandBody + "\nHow's the weather?");
     }
+    
+    [Test]
+    public void ResolveParameters_ContextCommandResolver_Set_Ok()
+    {
+        // Arrange
+        var prompts = new[] {
+            ("user",  $"-context \"Context Test\" How's the weather?")
+        };
+
+        // Act
+        var chatRequest = _resolver.TestParseRequest(prompts);
+
+        // Assert
+        chatRequest.Messages[0].Content.Should().Be("Context Test");
+    }
+    
+    [Test]
+    public void ResolveParameters_ContextCommandResolver_UnSet_Ok()
+    {
+        // Arrange
+        var prompts = new[] {
+            ("user",  $"-context \"Context Test\" How's the weather?"),
+            ("assistant",  $"Today is a good day"),
+            ("user",  $"-context \"clear\" Will it rain tomorrow?"),
+        };
+
+        // Act
+        var chatRequest = _resolver.TestParseRequest(prompts);
+
+        // Assert
+        chatRequest.Messages[0].Content.Should().StartWith("You are a helpful assistant");
+    }
+    
+    [Test]
+    public void ResolveParameters_ContextCommandResolver_UnSet_Persistant_Ok()
+    {
+        // Arrange
+        var prompts = new[] {
+            ("user",  $"-context \"Context Test\" How's the weather?"),
+            ("assistant",  $"Today is a good day"),
+            ("user",  $"-context \"clear\" Will it rain tomorrow?"),
+            ("assistant",  $"I don't know."),
+            ("user",  $"Don't worry. I'll ask again tomorrow.")
+        };
+
+        // Act
+        var chatRequest = _resolver.TestParseRequest(prompts);
+
+        // Assert
+        chatRequest.Messages[0].Content.Should().StartWith("You are a helpful assistant");
+    }
+    
+    [Test]
+    public void ResolveParameters_ContextCommandResolver_Set_Persistant_Ok()
+    {
+        // Arrange
+        var prompts = new[] {
+            ("user",  $"-context \"Context Test\" How's the weather?"),
+            ("assistant",  $"Today is a good day"),
+            ("user",  $"Will it rain tomorrow?")
+        };
+
+        // Act
+        var chatRequest = _resolver.TestParseRequest(prompts);
+
+        // Assert
+        chatRequest.Messages[0].Content.Should().Be("Context Test");
+    }
+    
+    [Test]
+    public void ResolveParameters_ContextCommandResolver_Set_SystemOverwrite_Ok()
+    {
+        // Arrange
+        var prompts = new[] {
+            ("user",  $"-context \"Context Test\" How's the weather?"),
+            ("assistant",  $"Today is a good day"),
+            ("user",  $"-system \"System Test\" Will it rain tomorrow?")
+        };
+
+        // Act
+        var chatRequest = _resolver.TestParseRequest(prompts);
+
+        // Assert
+        chatRequest.Messages[0].Content.Should().Be("System Test");
+    }
+    
+    [Test]
+    public void ResolveParameters_ContextCommandResolver_Set_SystemOverwrite_Persistent_Ok()
+    {
+        // Arrange
+        var prompts = new[] {
+            ("user",  $"-context \"Context Test\" How's the weather?"),
+            ("assistant",  $"Today is a good day"),
+            ("user",  $"-system \"System Test\" Will it rain tomorrow?"),
+            ("assistant",  $"I don't know."),
+            ("user",  $"Don't worry. I'll ask again tomorrow.")
+        };
+
+        // Act
+        var chatRequest = _resolver.TestParseRequest(prompts);
+
+        // Assert
+        chatRequest.Messages[0].Content.Should().Be("Context Test");
+    }
 }

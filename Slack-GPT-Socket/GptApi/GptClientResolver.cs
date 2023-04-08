@@ -35,6 +35,7 @@ public class GptClientResolver
             new PresencePenaltyResolver(),
             new FrequencyPenaltyResolver(),
             new SystemResolver(),
+            new ContextResolver(),
             new PredefinedCommandResolver(customCommands)
         };
     }
@@ -46,7 +47,8 @@ public class GptClientResolver
     /// <param name="request">The GPT request.</param>
     /// <returns>A ChatRequest instance.</returns>
     public ChatRequest ParseRequest(List<WritableChatPrompt> chatPrompts, GptRequest request)
-    {
+    { 
+        GptSystemMessageBuilder? contextMessage = null;
         foreach (var chatPrompt in chatPrompts)
         {
             var content = GptRequest.Default(_gptDefaults);
@@ -54,10 +56,23 @@ public class GptClientResolver
             ResolveModel(ref content);
             ResolveParameters(ref content);
             chatPrompt.Content = content.Prompt;
+            
+            // TODO Refactor this into a separate resolver.
+            if (content.System.IsContextMessage == ContextMessageStatus.Set)
+            {
+                contextMessage = content.System;
+            }
+            else if (content.System.IsContextMessage == ContextMessageStatus.Cleared)
+            {
+                contextMessage = null;
+            }
         }
 
         ResolveModel(ref request);
         ResolveParameters(ref request);
+        
+        if(contextMessage != null && !request.System.IsModified)
+            request.System = contextMessage;
 
         WritableChatPrompt system;
         if (request.System.ShouldReplace)
@@ -204,10 +219,7 @@ public class GptClientResolver
             paramEndIndex = paramNameIndex + args.Name.Length + 2;
             searchString = args.Name + " ";
         }
-
-        // Add magic number to account for the space between parameters
-        ///if (lastIndex + 5 < paramNameIndex) return;
-
+        
         // Update last index to check if we've reached the end of the parameters
         lastIndex = paramEndIndex;
         input.Prompt = input.Prompt.Replace(searchString, "").Trim();

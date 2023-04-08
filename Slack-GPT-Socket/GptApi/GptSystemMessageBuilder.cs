@@ -21,11 +21,16 @@ public class GptSystemMessageBuilder
     public bool ShouldReplace { get; private set; }
     
     /// <summary>
+    ///     Is the system message modified?
+    /// </summary>
+    public bool IsModified { get; private set; }
+    
+    /// <summary>
     ///     Context message is treated as a system message, that is carried over to the next request.
     ///     Those can be overwritten by the next manual system request, or by the next context message.
     ///     After the next manual system request, the context message is kept until cleared manually.
     /// </summary>
-    public bool IsContextMessage { get; set; }
+    public ContextMessageStatus IsContextMessage { get; set; }
 
     /// <summary>
     ///     Adds a system message to the list.
@@ -34,6 +39,7 @@ public class GptSystemMessageBuilder
     public void Append(string message)
     {
         _messages.Add(message);
+        IsModified = true;
     }
 
     /// <summary>
@@ -44,6 +50,7 @@ public class GptSystemMessageBuilder
     {
         _messages.Add(message);
         ShouldReplace = true;
+        IsModified = true;
     }
 
     /// <summary>
