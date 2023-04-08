@@ -2,6 +2,7 @@
 using OpenAI.Chat;
 using Slack_GPT_Socket.GptApi.ParameterResolvers;
 using Slack_GPT_Socket.Settings;
+using Slack_GPT_Socket.Utilities.LiteDB;
 
 namespace Slack_GPT_Socket.GptApi;
 
@@ -18,7 +19,7 @@ public class GptClientResolver
     private readonly ModelInfo[] _models;
     private readonly List<IParameterResolver> _resolvers;
 
-    public GptClientResolver(GptCustomCommands customCommands, GptDefaults gptDefaults)
+    public GptClientResolver(GptCustomCommands customCommands, GptDefaults gptDefaults, IUserCommandDb userCommandDb)
     {
         _gptDefaults = gptDefaults;
         _models = new ModelInfo[]
@@ -36,7 +37,8 @@ public class GptClientResolver
             new FrequencyPenaltyResolver(),
             new SystemResolver(),
             new ContextResolver(),
-            new PredefinedCommandResolver(customCommands)
+            new PredefinedCommandResolver(customCommands),
+            new UsersCommandResolver(userCommandDb)
         };
     }
     

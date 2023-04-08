@@ -28,7 +28,8 @@ public static class SlackLoadingMessage
         "Grab a snack while you wait, we'll be here for a while.",
         "Loading... Don't worry, I'm just taking a coffee break.",
         "If patience is a virtue, you're about to become a saint. I'm loading...",
-        "I'm running on caffeine and code. I'll be with you shortly!"
+        "I'm running on caffeine and code. I'll be with you shortly!",
+        "Slack GPT plugin was made by https://prographers.com/ come check us out! :)",
     };
 
     /// <summary>

@@ -25,3 +25,14 @@ public class GptCommand
     /// </summary>
     public bool AsSystem { get; set; }
 }
+
+/// <summary>
+///     A custom command that can only be used by a specific user.
+/// </summary>
+public class GptUserCommand : GptCommand
+{
+    /// <summary>
+    ///     The user who created the command. If null, everyone can use it.
+    /// </summary>
+    public string? UserId { get; set; }
+}

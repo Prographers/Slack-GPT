@@ -1,6 +1,8 @@
+using LiteDB;
 using Slack_GPT_Socket;
 using Slack_GPT_Socket.GptApi;
 using Slack_GPT_Socket.Settings;
+using Slack_GPT_Socket.Utilities.LiteDB;
 using SlackNet.AspNetCore;
 using SlackNet.Events;
 
@@ -13,6 +15,9 @@ builder.Services.Configure<GptDefaults>(builder.Configuration.GetSection("GptDef
 
 builder.Services.AddSingleton<GptClient>();
 builder.Services.AddSingleton<GptCustomCommands>();
+builder.Services.AddSingleton<ILiteDatabase>(x => new LiteDatabase(builder.Configuration.GetConnectionString("LiteDB")));
+
+builder.Services.AddSingleton<IUserCommandDb, UserCommandDb>();
 
 builder.Services.AddSlackNet(c => c
     .UseApiToken(settings.SlackBotToken)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using OpenAI;
 using Slack_GPT_Socket.Settings;
+using Slack_GPT_Socket.Utilities.LiteDB;
 
 namespace Slack_GPT_Socket.GptApi;
 
@@ -20,7 +21,11 @@ public class GptClient
     /// <param name="customCommands">Custom commands handler</param>
     /// <param name="log">The logger instance.</param>
     /// <param name="settings">The API settings.</param>
-    public GptClient(GptCustomCommands customCommands, ILogger<GptClient> log, IOptions<GptDefaults> gptDefaults,
+    public GptClient(
+        GptCustomCommands customCommands, 
+        IUserCommandDb userCommandDb,
+        ILogger<GptClient> log, 
+        IOptions<GptDefaults> gptDefaults,
         IOptions<ApiSettings> settings)
     {
         var httpClient = new HttpClient
@@ -30,7 +35,7 @@ public class GptClient
         _api = new OpenAIClient(settings.Value.OpenAIKey, OpenAIClientSettings.Default, httpClient);
         _log = log;
         _gptDefaults = gptDefaults.Value;
-        _resolver = new GptClientResolver(customCommands, _gptDefaults);
+        _resolver = new GptClientResolver(customCommands, _gptDefaults, userCommandDb);
     }
 
     /// <summary>

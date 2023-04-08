@@ -22,7 +22,8 @@ public class GptClientResolverTests
         _customCommands = new GptCustomCommands(MoqUtils.CreateOptionsMonitorMock(
             new GptCommands()
         ));
-        _resolver = new GptClientResolver(_customCommands, _gptDefaults);
+        var userCommandDb = new MemoryUserCommandDb();
+        _resolver = new GptClientResolver(_customCommands, _gptDefaults, userCommandDb);
     }
 
     [Test]

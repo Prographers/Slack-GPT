@@ -21,7 +21,8 @@ public class SlackCommandHandler : ISlashCommandHandler
     private readonly GptDefaults _gptDefaults;
     private readonly ILogger _log;
 
-    public SlackCommandHandler(GptCustomCommands customCommands, SlackBotInfo botInfo, ISlackApiClient slack, IOptions<GptDefaults> gptDefaults,
+    public SlackCommandHandler(GptCustomCommands customCommands, SlackBotInfo botInfo, ISlackApiClient slack,
+        IOptions<GptDefaults> gptDefaults,
         ILogger<SlackCommandHandler> log)
     {
         _customCommands = customCommands;
@@ -49,7 +50,7 @@ public class SlackCommandHandler : ISlashCommandHandler
             {
                 var text = $"{result.Command} - {result.Description}\nPrompt:\n> {result.Prompt}" +
                            $"\n\nIs executed as system command: {result.AsSystem}";
-                
+
                 return SlashCommandResponse(text);
             }
 
@@ -83,14 +84,22 @@ public class SlackCommandHandler : ISlashCommandHandler
     {
         var sb = new StringBuilder();
         sb.AppendLine("Model parameters:");
-        sb.AppendLine($"-maxTokens: limits tokens in output, default {_gptDefaults.MaxTokens?.ToString() ?? "4000"} (GPT-3.5: 4000, GPT-4: 8000);");
+        sb.AppendLine(
+            $"-maxTokens: limits tokens in output, default {_gptDefaults.MaxTokens?.ToString() ?? "4000"} (GPT-3.5: 4000, GPT-4: 8000);");
         sb.AppendLine($"-temperature: controls randomness, default {_gptDefaults.Temperature?.ToString() ?? "0.7"};");
         sb.AppendLine($"-topP: filters token choices, default {_gptDefaults.TopP?.ToString() ?? "1"};");
-        sb.AppendLine($"-presencePenalty: penalizes repeated tokens, default {_gptDefaults.PresencePenalty?.ToString() ?? "0"};");
-        sb.AppendLine($"-frequencyPenalty: discourages frequent tokens, default {_gptDefaults.FrequencyPenalty?.ToString() ?? "0"};");
-        sb.AppendLine($"-model: specifies model, default {(_gptDefaults.Model ?? "gpt-4").ToLower()}, options: gpt-4, gpt-3.5-turbo;");
+        sb.AppendLine(
+            $"-presencePenalty: penalizes repeated tokens, default {_gptDefaults.PresencePenalty?.ToString() ?? "0"};");
+        sb.AppendLine(
+            $"-frequencyPenalty: discourages frequent tokens, default {_gptDefaults.FrequencyPenalty?.ToString() ?? "0"};");
+        sb.AppendLine(
+            $"-model: specifies model, default {(_gptDefaults.Model ?? "gpt-4").ToLower()}, options: gpt-4, gpt-3.5-turbo;");
         sb.AppendLine(
             $"-system: custom system message, default \"{_gptDefaults.Model ?? "You are a helpful assistant. Today is {Current Date}"}\".");
+        sb.AppendLine(
+            "-context: similar to system message, but it is persistent for a duration of the conversation. You can clear the context" +
+            "by applying -context clear. You can temporarily overwrite context by applying system message. Only latest context message" +
+            "is used, they do not stack.");
 
         return sb.ToString();
     }
@@ -104,7 +113,7 @@ public class SlackCommandHandler : ISlashCommandHandler
     {
         var sb = new StringBuilder();
         sb.AppendLine($"To use this bot, please send a message tagging <@{_botInfo.BotInfo.UserId}> " +
-                      $"on a channel where he is invited.")
+                      $"on a channel where he is invited. Brought to you by https://prographers.com/")
             .AppendLine($"Use {command.Command} help to display this help.")
             .AppendLine($"Use {command.Command} help -[command] to display prompt of the command.")
             .AppendLine($"Use {command.Command} status to display bot status.")
