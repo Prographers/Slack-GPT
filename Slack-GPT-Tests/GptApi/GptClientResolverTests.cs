@@ -1,8 +1,10 @@
 using FluentAssertions;
+using LiteDB;
 using OpenAI.Chat;
 using Slack_GPT_Socket;
 using Slack_GPT_Socket.GptApi;
 using Slack_GPT_Socket.Settings;
+using Slack_GPT_Socket.Utilities.LiteDB;
 
 namespace Slack_GPT_Tests.GptApi;
 
@@ -22,7 +24,7 @@ public class GptClientResolverTests
         _customCommands = new GptCustomCommands(MoqUtils.CreateOptionsMonitorMock(
             new GptCommands()
         ));
-        var userCommandDb = new MemoryUserCommandDb();
+        var userCommandDb = new UserCommandDb(new LiteDatabase("Filename=:memory:;Mode=Memory;Cache=Shared"));
         _resolver = new GptClientResolver(_customCommands, _gptDefaults, userCommandDb);
     }
 

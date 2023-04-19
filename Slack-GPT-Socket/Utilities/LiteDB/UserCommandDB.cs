@@ -3,11 +3,6 @@ using Slack_GPT_Socket.Settings;
 
 namespace Slack_GPT_Socket.Utilities.LiteDB;
 
-public interface IUserCommandDb
-{
-    GptUserCommand? FindCommand(string command, string? userId = null);
-}
-
 public class UserCommandDb : IUserCommandDb
 {
     private readonly ILiteDatabase _database;
@@ -18,12 +13,32 @@ public class UserCommandDb : IUserCommandDb
         _database = database;
         _commands = database.GetCollection<GptUserCommand>("Commands");
         _commands.EnsureIndex(x => x.Command);
+        _commands.EnsureIndex(x => x.UserId);
     }
 
+    /// <inheritdoc />
     public GptUserCommand? FindCommand(string command, string? userId = null)
     {
         var result = _commands.FindOne(x => x.Command == command
                                             && (x.UserId == userId || x.UserId == null));
         return result;
+    }
+
+    /// <inheritdoc />
+    public void AddCommand(GptUserCommand command)
+    {
+        _commands.Insert(command);
+    }
+
+    /// <inheritdoc />
+    public void RemoveCommand(GptUserCommand command)
+    {
+        _commands.DeleteMany(x => x.Command == command.Command && x.UserId == command.UserId);
+    }
+
+    /// <inheritdoc />
+    public GptUserCommand[] GetAllCommands(string userId = null)
+    {
+        return _commands.Find(x => x.UserId == userId).ToArray();
     }
 }

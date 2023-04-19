@@ -21,7 +21,10 @@ public class SlackCommandHandler : ISlashCommandHandler
     private readonly GptDefaults _gptDefaults;
     private readonly ILogger _log;
 
-    public SlackCommandHandler(GptCustomCommands customCommands, SlackBotInfo botInfo, ISlackApiClient slack,
+    public SlackCommandHandler(
+        GptCustomCommands customCommands, 
+        SlackBotInfo botInfo, 
+        ISlackApiClient slack,
         IOptions<GptDefaults> gptDefaults,
         ILogger<SlackCommandHandler> log)
     {
