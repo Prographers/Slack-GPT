@@ -90,22 +90,17 @@ public class CommandHandlerTests
         });
 
         // Act
-        var generalResponse = await _commandManager.Execute(new SlashCommand()
-        {
-            Text = "help",
-            UserId = "U0123ID"
-        });
-        
+        await ExecuteAndAssertSlashCommand("help", "U0123ID", "This is a custom command");
+        await ExecuteAndAssertSlashCommand("help -customCommand", "U0123ID", "This is a custom command");
+        await ExecuteAndAssertSlashCommand("help -customcommand", "U0123ID", "This is a custom command");
+    }
+
+    private async Task ExecuteAndAssertSlashCommand(string commandText, string userId, string expectedText)
+    {
         var response = await _commandManager.Execute(new SlashCommand()
         {
-            Text = "help -customCommand",
-            UserId = "U0123ID"
-        });
-        
-        var caseInsensitiveResponse = await _commandManager.Execute(new SlashCommand()
-        {
-            Text = "help -customcommand",
-            UserId = "U0123ID"
+            Text = commandText,
+            UserId = userId
         });
 
         // Assert
@@ -114,20 +109,6 @@ public class CommandHandlerTests
         var text = (response.Message.Blocks[0] as SectionBlock)!.Text.Text;
         Console.WriteLine(text);
         text.Should().NotBeNullOrEmpty();
-        text.Should().Contain("This is a custom command");
-        
-        generalResponse.Message.Blocks[0].Should().BeOfType<SectionBlock>();
-        generalResponse.Message.Blocks[0].Should().NotBeNull();
-        text = (generalResponse.Message.Blocks[0] as SectionBlock)!.Text.Text;
-        Console.WriteLine(text);
-        text.Should().NotBeNullOrEmpty();
-        text.Should().Contain("This is a custom command");
-        
-        caseInsensitiveResponse.Message.Blocks[0].Should().BeOfType<SectionBlock>();
-        caseInsensitiveResponse.Message.Blocks[0].Should().NotBeNull();
-        text = (caseInsensitiveResponse.Message.Blocks[0] as SectionBlock)!.Text.Text;
-        Console.WriteLine(text);
-        text.Should().NotBeNullOrEmpty();
-        text.Should().Contain("This is a custom command");
+        text.Should().Contain(expectedText);
     }
 }
