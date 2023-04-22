@@ -41,7 +41,7 @@ public class WhatsNewCommandStrategy : ICommandStrategy
             return CommandStrategyUtils.SlashCommandResponse($"No release found for current version. {currentVersion}");
         
         return CommandStrategyUtils.SlashCommandResponse(
-            $"*{latestRelease.TagName}*\n" +
+            $"*Whats new: {latestRelease.Name}*\n" +
             $"{latestRelease.Body}\n" +
             $"\n" +
             $"\t{latestRelease.HtmlUrl}");
