@@ -315,7 +315,7 @@ public class CommandHandlerTests
         var response = await _commandManager.Execute(slashCommand);
 
         // Assert
-        AssertCommandResult(response, "No release found");
+        AssertCommandResult(response, "unknown version");
     }
     
     [Test]

@@ -1,4 +1,5 @@
-﻿using Octokit;
+﻿using System.Text;
+using Octokit;
 using SlackNet.Interaction;
 
 namespace Slack_GPT_Socket.Command;
@@ -35,15 +36,57 @@ public class WhatsNewCommandStrategy : ICommandStrategy
             ? Application.VersionString
             : versionString;
 
-        var latestRelease = releases.FirstOrDefault(r => r.TagName == currentVersion);
+        var latestRelease = releases.FirstOrDefault();
+        var latestVersion = latestRelease?.TagName;
+        var currentRelease = releases.FirstOrDefault(r => r.TagName == currentVersion);
+        var releaseNotes = new StringBuilder();
 
-        if (latestRelease == null)
-            return CommandStrategyUtils.SlashCommandResponse($"No release found for current version. {currentVersion}");
+        if (currentRelease == null)
+        {
+            releaseNotes.AppendLine("You are running an *unknown version* of the bot.");
+            releaseNotes.AppendLine("Please update to the latest version.");
+            releaseNotes.AppendLine();
+            releaseNotes.AppendLine($"Current version: {Application.VersionString}");
+            releaseNotes.AppendLine($"Latest version: {latestVersion}");
+            releaseNotes.AppendLine();
+        }
         
-        return CommandStrategyUtils.SlashCommandResponse(
-            $"*Whats new: {latestRelease.Name}*\n" +
-            $"{latestRelease.Body}\n" +
-            $"\n" +
-            $"\t{latestRelease.HtmlUrl}");
+        var currentMajorMinor = currentVersion.Substring(0, currentVersion.LastIndexOf('.'));
+        var latestMajorMinor = latestVersion.Substring(0, latestVersion.LastIndexOf('.'));
+
+        var relevantReleases = releases
+            .Where(r => r.TagName.StartsWith(currentMajorMinor))
+            .OrderByDescending(r => r.TagName)
+            .ToList();
+
+
+        if (currentMajorMinor != latestMajorMinor)
+        {
+            releaseNotes.AppendLine("*New Update!*");
+            foreach (var release in releases.Where(r => r.TagName.StartsWith(latestMajorMinor)).OrderByDescending(r => r.TagName))
+            {
+                releaseNotes.AppendLine($"{release.TagName}");
+                releaseNotes.AppendLine($"{release.Body}");
+                releaseNotes.AppendLine();
+                releaseNotes.AppendLine($"\t{release.HtmlUrl}");
+            }
+
+            releaseNotes.AppendLine();
+            releaseNotes.AppendLine("*Whats new - current version*");
+        }
+        else
+        {
+            releaseNotes.AppendLine("*Whats new*");
+        }
+
+        foreach (var release in relevantReleases)
+        {
+            releaseNotes.AppendLine($"{release.TagName}");
+            releaseNotes.AppendLine($"{release.Body}");
+            releaseNotes.AppendLine();
+            releaseNotes.AppendLine($"\t{release.HtmlUrl}");
+        }
+
+        return CommandStrategyUtils.SlashCommandResponse(releaseNotes.ToString());
     }
 }
