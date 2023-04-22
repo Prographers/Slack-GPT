@@ -10,7 +10,9 @@ services:
     volumes:
       # See appsettings.json.example for configuration this file is required
       - ./appsettings.json:/app/appsettings.json 
-      - slack-gpt-liteDB:/app/app.db:rw
+      - type: volume
+        source: slack-gpt-liteDB
+        target: /app/db
 
   watchtower-slack-gpt:
     image: containrrr/watchtower
@@ -23,3 +25,9 @@ services:
     
 volumes:
   slack-gpt-liteDB:
+    driver: local
+    driver_opts:
+      type: none
+      device: /var/lib/docker/volumes/slack-gpt-liteDB
+      o: bind
+    name: slack-gpt-liteDB
