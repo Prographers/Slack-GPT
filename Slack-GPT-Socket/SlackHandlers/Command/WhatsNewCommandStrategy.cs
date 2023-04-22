@@ -87,6 +87,6 @@ public class WhatsNewCommandStrategy : ICommandStrategy
             releaseNotes.AppendLine($"\t{release.HtmlUrl}");
         }
 
-        return CommandStrategyUtils.SlashCommandResponse(releaseNotes.ToString());
+        return CommandStrategyUtils.SlashCommandResponse(releaseNotes.ToString()[..1000]);
     }
 }
