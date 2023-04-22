@@ -10,7 +10,7 @@ services:
     volumes:
       # See appsettings.json.example for configuration this file is required
       - ./appsettings.json:/app/appsettings.json 
-      - slack-gpt-liteDB:/app/app.db
+      - slack-gpt-liteDB:/app/app.db:rw
 
   watchtower-slack-gpt:
     image: containrrr/watchtower
