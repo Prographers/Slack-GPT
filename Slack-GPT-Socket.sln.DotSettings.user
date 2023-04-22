@@ -11,5 +11,6 @@
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientUserCommandsTests.ResolveParameters_UserCommand_Remove_NotFound_Ok&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientUserCommandsTests.ResolveParameters_UserCommand_Exists_NotFound_Ok&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.ExecuteCommand_Ok&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.HelpCommand_CustomGlobal_Ok&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

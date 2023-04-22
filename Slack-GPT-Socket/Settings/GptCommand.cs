@@ -5,11 +5,17 @@
 /// </summary>
 public class GptCommand
 {
+    private string _command;
+
     /// <summary>
     ///     The command to trigger the custom command.
     /// </summary>
-    public string Command { get; set; }
-    
+    public string Command
+    {
+        get => _command;
+        set => _command = value.ToLower();
+    }
+
     /// <summary>
     ///     The description of the command to display in the help.
     /// </summary>

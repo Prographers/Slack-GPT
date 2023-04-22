@@ -23,7 +23,7 @@ public class CommandHandlerTests
         _customCommands = new GptCustomCommands(MoqUtils.CreateOptionsMonitorMock(
             new GptCommands()
         ));
-        var userCommandDb = new UserCommandDb(new LiteDatabase("Filename=:memory:;Mode=Memory;Cache=Shared"));
+        _userCommandDb = new UserCommandDb(new LiteDatabase("Filename=:memory:;Mode=Memory;Cache=Shared"));
 
         _botInfo = new SlackBotInfo()
         {
@@ -34,11 +34,12 @@ public class CommandHandlerTests
             }
         };
         _commandManager = new CommandManager(
-            _customCommands, _botInfo, userCommandDb, _gptDefaults, null
+            _customCommands, _botInfo, _userCommandDb, _gptDefaults, null
         );
     }
 
     private GptDefaults _gptDefaults;
+    private UserCommandDb _userCommandDb;
     private GptCustomCommands _customCommands;
     private GptClientResolver _resolver;
     private CommandManager _commandManager;
@@ -68,5 +69,65 @@ public class CommandHandlerTests
         Console.WriteLine(text);
         text.Should().NotBeNullOrEmpty();
         text.Should().Contain(contains);
+    }
+
+    [Test]
+    [TestCase(null)]
+    [TestCase("U0123ID")]
+    public async Task HelpCommand_CustomGlobal_Ok(string? userId)
+    {
+        // Arrange
+        var slashCommand = new SlashCommand()
+        {
+            Text = "help -customCommand"
+        };
+        _userCommandDb.AddCommand(new GptUserCommand()
+        {
+            Command = "-customCommand",
+            UserId = userId,
+            Description = "This is a custom command",
+            Prompt = "This is a custom command",
+        });
+
+        // Act
+        var generalResponse = await _commandManager.Execute(new SlashCommand()
+        {
+            Text = "help",
+            UserId = "U0123ID"
+        });
+        
+        var response = await _commandManager.Execute(new SlashCommand()
+        {
+            Text = "help -customCommand",
+            UserId = "U0123ID"
+        });
+        
+        var caseInsensitiveResponse = await _commandManager.Execute(new SlashCommand()
+        {
+            Text = "help -customcommand",
+            UserId = "U0123ID"
+        });
+
+        // Assert
+        response.Message.Blocks[0].Should().BeOfType<SectionBlock>();
+        response.Message.Blocks[0].Should().NotBeNull();
+        var text = (response.Message.Blocks[0] as SectionBlock)!.Text.Text;
+        Console.WriteLine(text);
+        text.Should().NotBeNullOrEmpty();
+        text.Should().Contain("This is a custom command");
+        
+        generalResponse.Message.Blocks[0].Should().BeOfType<SectionBlock>();
+        generalResponse.Message.Blocks[0].Should().NotBeNull();
+        text = (generalResponse.Message.Blocks[0] as SectionBlock)!.Text.Text;
+        Console.WriteLine(text);
+        text.Should().NotBeNullOrEmpty();
+        text.Should().Contain("This is a custom command");
+        
+        caseInsensitiveResponse.Message.Blocks[0].Should().BeOfType<SectionBlock>();
+        caseInsensitiveResponse.Message.Blocks[0].Should().NotBeNull();
+        text = (caseInsensitiveResponse.Message.Blocks[0] as SectionBlock)!.Text.Text;
+        Console.WriteLine(text);
+        text.Should().NotBeNullOrEmpty();
+        text.Should().Contain("This is a custom command");
     }
 }
