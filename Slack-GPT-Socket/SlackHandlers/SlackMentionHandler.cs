@@ -99,19 +99,19 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
                 if (IsBotReply(reply))
                 {
                     var response = SlackParserUtils.RemoveContextBlockFromResponses(reply);
-                    if (response != null) context.Add(new WritableChatPrompt("assistant", response));
+                    if (response != null) context.Add(new WritableChatPrompt("assistant", "__assistant__", response));
                 }
                 else if (IsUserReply(reply))
                 {
                     if (slackEvent.Ts == reply.Ts)
                         continue;
                     var response = reply.Text.Replace("<@" + _botInfo.BotInfo.UserId + ">", "").Trim();
-                    context.Add(new WritableChatPrompt("user", response));
+                    context.Add(new WritableChatPrompt("user", reply.User, response));
                 }
             }
         }
 
-        context.Add(new WritableChatPrompt("user", slackEvent.Text));
+        context.Add(new WritableChatPrompt("user", slackEvent.User, slackEvent.Text));
 
         return context;
     }

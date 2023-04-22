@@ -1,4 +1,5 @@
 using System.Globalization;
+using Slack_GPT_Socket.Settings;
 
 namespace Slack_GPT_Socket.GptApi.ParameterResolvers;
 
@@ -8,18 +9,32 @@ namespace Slack_GPT_Socket.GptApi.ParameterResolvers;
 public class FrequencyPenaltyResolver : IParameterResolver
 {
     /// <inheritdoc />
+    public static string[] Names { get; } =
+    {
+        "-frequency_penalty",
+        "-frequency-penalty",
+        "-frequencypenalty",
+    };
+
+    /// <inheritdoc />
     public string Name => "-frequencyPenalty";
+
+    /// <inheritdoc />
+    public string BuildShortHelpText(GptDefaults gptDefaults, string userId)
+    {
+        return $"{Name}: discourages frequent tokens, default {gptDefaults.FrequencyPenalty?.ToString() ?? "0"}";
+    }
+
+    /// <inheritdoc />
+    public string BuildHelpText(GptDefaults gptDefaults, string commandName, string userId)
+    {
+        return $"{Name}: discourages frequent tokens, default {gptDefaults.FrequencyPenalty?.ToString() ?? "0"}";
+    }
 
     /// <inheritdoc />
     public bool CanHandle(ParameterEventArgs args)
     {
-        var names = new[]
-        {
-            "-frequency_penalty",
-            "-frequency-penalty",
-            "-frequencypenalty",
-        };
-        return names.Contains(args.Name.ToLower());
+        return Names.Contains(args.Name.ToLower());
     }
 
     /// <inheritdoc />

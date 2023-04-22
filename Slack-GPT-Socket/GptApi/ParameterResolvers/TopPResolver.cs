@@ -1,4 +1,5 @@
 using System.Globalization;
+using Slack_GPT_Socket.Settings;
 
 namespace Slack_GPT_Socket.GptApi.ParameterResolvers;
 
@@ -8,20 +9,32 @@ namespace Slack_GPT_Socket.GptApi.ParameterResolvers;
 public class TopPResolver : IParameterResolver
 {
     /// <inheritdoc />
+    public static string[] Names { get; } =
+    {
+        "-top_p",
+        "-top-p",
+        "-topp"
+    };
+
+    /// <inheritdoc />
     public string Name => "-topP";
+
+    /// <inheritdoc />
+    public string BuildShortHelpText(GptDefaults gptDefaults, string userId)
+    {
+        return $"{Name}: filters token choices, default {gptDefaults.TopP?.ToString() ?? "1"}";
+    }
+
+    /// <inheritdoc />
+    public string BuildHelpText(GptDefaults gptDefaults, string commandName, string userId)
+    {
+        return $"{Name}: filters token choices, default {gptDefaults.TopP?.ToString() ?? "1"}";
+    }
 
     /// <inheritdoc />
     public bool CanHandle(ParameterEventArgs args)
     {
-        var names = new[]
-        {
-            "-top_p",
-            "-top-p",
-            "-topp",
-            "-top-p",
-            "-top_p"
-        };
-        return names.Contains(args.Name.ToLower());
+        return Names.Contains(args.Name.ToLower());
     }
 
     /// <inheritdoc />

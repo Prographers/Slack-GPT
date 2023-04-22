@@ -1,3 +1,5 @@
+using Slack_GPT_Socket.Settings;
+
 namespace Slack_GPT_Socket.GptApi.ParameterResolvers;
 
 /// <summary>
@@ -6,17 +8,33 @@ namespace Slack_GPT_Socket.GptApi.ParameterResolvers;
 public class SystemResolver : IParameterResolver
 {
     /// <inheritdoc />
+    public static string[] Names { get; } =
+    {
+        "-system",
+        "-s"
+    };
+
+    /// <inheritdoc />
     public string Name => "-system";
+
+    /// <inheritdoc />
+    public string BuildShortHelpText(GptDefaults gptDefaults, string userId)
+    {
+        return
+            $"{Name}: custom system message, default \"{gptDefaults.Model ?? "You are a helpful assistant. Today is {Current Date}"}\".";
+    }
+
+    /// <inheritdoc />
+    public string BuildHelpText(GptDefaults gptDefaults, string commandName, string userId)
+    {
+        return
+            $"{Name}: custom system message, default \"{gptDefaults.Model ?? "You are a helpful assistant. Today is {Current Date}"}\".";
+    }
 
     /// <inheritdoc />
     public bool CanHandle(ParameterEventArgs args)
     {
-        var names = new[]
-        {
-            "-system",
-            "-s"
-        };
-        return names.Contains(args.Name.ToLower());
+        return Names.Contains(args.Name.ToLower());
     }
 
     /// <inheritdoc />

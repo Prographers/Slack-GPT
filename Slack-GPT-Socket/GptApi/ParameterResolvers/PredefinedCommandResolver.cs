@@ -1,3 +1,6 @@
+using System.Text;
+using Slack_GPT_Socket.Settings;
+
 namespace Slack_GPT_Socket.GptApi.ParameterResolvers;
 
 /// <summary>
@@ -11,9 +14,45 @@ public class PredefinedCommandResolver : IParameterResolver
     {
         _customCommands = customCommands;
     }
-    
+
+    /// <inheritdoc />
+    public static string[] Names { get; } = { "-command" };
+
     /// <inheritdoc />
     public string Name => "-command";
+
+    /// <inheritdoc />
+    public string BuildShortHelpText(GptDefaults gptDefaults, string userId)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Predefined commands:");
+        foreach (var command in _customCommands.Commands.Commands)
+        {
+            if (command.AsSystem) sb.AppendLine("[S]");
+            sb.AppendLine($"\t{command.Command}: {command.Description}");
+        }
+
+        if (_customCommands.Commands.Commands.Count == 0)
+        {
+            sb.AppendLine("\tNo predefined commands found.");
+        }
+
+        return sb.ToString();
+    }
+
+    /// <inheritdoc />
+    public string BuildHelpText(GptDefaults gptDefaults, string commandName, string userId)
+    {
+        if (_customCommands.TryResolveCommand(commandName, out var command))
+        {
+            return $"{command!.Command} - {command.Description}" +
+                   $"\nPrompt:\n> {command.Prompt}" +
+                   $"\n\nIs executed as system command: {command.AsSystem}";
+        }
+
+        return $"Command {commandName} not found.";
+
+    }
 
     /// <inheritdoc />
     public bool CanHandle(ParameterEventArgs args)

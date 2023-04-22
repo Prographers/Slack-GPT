@@ -8,17 +8,22 @@ public class ParameterEventArgs : EventArgs
     /// <summary>
     ///     Name of the parameter to resolve
     /// </summary>
-    public string Name { get; init; }
+    public required string Name { get; init; }
+    
+    /// <summary>
+    ///     User ID of the user who sent the request
+    /// </summary>
+    public required string UserId { get; init; }
     
     /// <summary>
     ///     Value of the parameter to resolve
     /// </summary>
-    public string Value { get; init; }
+    public required string Value { get; init; }
     
     /// <summary>
     ///     Raw value of the parameter to resolve with or without double quotes
     /// </summary>
-    public string ValueRaw { get; init; }
+    public required string ValueRaw { get; init; }
 
     /// <summary>
     ///     Is the parameter value present?

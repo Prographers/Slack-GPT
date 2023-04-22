@@ -1,4 +1,5 @@
 using System.Globalization;
+using Slack_GPT_Socket.Settings;
 
 namespace Slack_GPT_Socket.GptApi.ParameterResolvers;
 
@@ -8,18 +9,32 @@ namespace Slack_GPT_Socket.GptApi.ParameterResolvers;
 public class PresencePenaltyResolver : IParameterResolver
 {
     /// <inheritdoc />
+    public static string[] Names { get; } =
+    {
+        "-presence_penalty",
+        "-presence-penalty",
+        "-presencepenalty",
+    };
+
+    /// <inheritdoc />
     public string Name => "-presencePenalty";
+
+    /// <inheritdoc />
+    public string BuildShortHelpText(GptDefaults gptDefaults, string userId)
+    {
+        return $"{Name}: penalizes repeated tokens, default {gptDefaults.PresencePenalty?.ToString() ?? "0"}";
+    }
+
+    /// <inheritdoc />
+    public string BuildHelpText(GptDefaults gptDefaults, string commandName, string userId)
+    {
+        return $"{Name}: penalizes repeated tokens, default {gptDefaults.PresencePenalty?.ToString() ?? "0"}";
+    }
 
     /// <inheritdoc />
     public bool CanHandle(ParameterEventArgs args)
     {
-        var names = new[]
-        {
-            "-presence_penalty",
-            "-presence-penalty",
-            "-presencepenalty",
-        };
-        return names.Contains(args.Name.ToLower());
+        return Names.Contains(args.Name.ToLower());
     }
 
     /// <inheritdoc />

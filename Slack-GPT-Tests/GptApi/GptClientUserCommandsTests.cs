@@ -28,14 +28,16 @@ public class GptClientUserCommandsTests
     }
     
     [Test]
-    public void ResolveParameters_UserCommand_Ok()
+    [TestCase(null)]
+    [TestCase("U0123ID")]
+    public void ResolveParameters_UserCommand_Ok(string? userId)
     {
         // Arrange
         var command = new GptUserCommand()
         {
             Command = "-test",
             Prompt = "This is a test command.",
-            UserId = null,
+            UserId = userId,
             Description = "This is a test command."
         };
         _userCommandDb.AddCommand(command);
@@ -45,14 +47,16 @@ public class GptClientUserCommandsTests
         };
 
         // Act
-        var chatRequest = _resolver.TestParseRequest(prompts);
+        var chatRequest = _resolver.TestParseRequest("U0123ID", prompts);
 
         // Assert
         chatRequest.Messages[1].Content.Should().Be($"{command.Prompt}\nHow's the weather?");
     }
     
     [Test]
-    public void ResolveParameters_UserCommand_AddMultiple_Test_Ok()
+    [TestCase(null)]
+    [TestCase("U0123ID")]
+    public void ResolveParameters_UserCommand_AddMultiple_Test_Ok(string? userId)
     {
         // Arrange
         for (int i = 0; i < 3; i++)
@@ -61,7 +65,7 @@ public class GptClientUserCommandsTests
             {
                 Command = $"-test_{i}",
                 Prompt = $"This is a test command number {i}.",
-                UserId = null,
+                UserId = userId,
                 Description = $"This is a test command number {i}."
             };
             _userCommandDb.AddCommand(command);
@@ -71,7 +75,7 @@ public class GptClientUserCommandsTests
             };
 
             // Act
-            var chatRequest = _resolver.TestParseRequest(prompts);
+            var chatRequest = _resolver.TestParseRequest("U0123ID", prompts);
 
             // Assert
             chatRequest.Messages[1].Content.Should().Be($"{command.Prompt}\nHow's the weather?");
@@ -80,14 +84,16 @@ public class GptClientUserCommandsTests
 
     
     [Test]
-    public void ResolveParameters_UserCommand_Remove_NotFound_Ok()
+    [TestCase(null)]
+    [TestCase("U0123ID")]
+    public void ResolveParameters_UserCommand_Remove_NotFound_Ok(string? userId)
     {
         // Arrange
         var command = new GptUserCommand()
         {
             Command = "-test",
             Prompt = "This is a test command.",
-            UserId = null,
+            UserId = userId,
             Description = "This is a test command."
         };
         _userCommandDb.AddCommand(command);
@@ -98,7 +104,34 @@ public class GptClientUserCommandsTests
         };
 
         // Act
-        var chatRequest = _resolver.TestParseRequest(prompts);
+        var chatRequest = _resolver.TestParseRequest("U0123ID", prompts);
+
+        // Assert
+        chatRequest.Messages[1].Content.Should().Be($"-test How's the weather?");
+    }
+    
+    [Test]
+    [TestCase("U0123ID", "U9999ID")]
+    [TestCase("U9999ID", "U0123ID")]
+    public void ResolveParameters_UserCommand_Exists_NotFound_Ok(string? ownerId, string? userId)
+    {
+        // Arrange
+        var command = new GptUserCommand()
+        {
+            Command = "-test",
+            Prompt = "This is a test command.",
+            UserId = ownerId,
+            Description = "This is a test command."
+        };
+        _userCommandDb.AddCommand(command);
+        _userCommandDb.RemoveCommand(command);
+        
+        var prompts = new[] {
+            ("user",  $"-test How's the weather?")
+        };
+
+        // Act
+        var chatRequest = _resolver.TestParseRequest(userId, prompts);
 
         // Assert
         chatRequest.Messages[1].Content.Should().Be($"-test How's the weather?");

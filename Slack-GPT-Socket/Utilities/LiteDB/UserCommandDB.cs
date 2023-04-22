@@ -19,9 +19,9 @@ public class UserCommandDb : IUserCommandDb
     /// <inheritdoc />
     public GptUserCommand? FindCommand(string command, string? userId = null)
     {
-        var result = _commands.FindOne(x => x.Command == command
-                                            && (x.UserId == userId || x.UserId == null));
-        return result;
+        var userCommand = _commands.FindOne(x => x.Command == command && x.UserId == userId);
+        var globalCommand = _commands.FindOne(x => x.Command == command && x.UserId == null);
+        return userCommand ?? globalCommand;
     }
 
     /// <inheritdoc />

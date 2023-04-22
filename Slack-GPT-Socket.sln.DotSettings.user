@@ -1,5 +1,5 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">C:\Users\Tomasz\AppData\Local\JetBrains\Rider2022.3\resharper-host\temp\Rider\vAny\CoverageData\_Slack-GPT-Socket.743528568\Snapshot\snapshot.utdcvr</s:String>
+	
 	
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e72966db_002D060a_002D4577_002D858b_002D3601c1cb06de/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ContextBlockSanitation_OK" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
@@ -9,5 +9,7 @@
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientUserCommandsTests.ResolveParameters_UserCommand_Ok&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientUserCommandsTests.ResolveParameters_UserCommand_AddMultiple_Test_Ok&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientUserCommandsTests.ResolveParameters_UserCommand_Remove_NotFound_Ok&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientUserCommandsTests.ResolveParameters_UserCommand_Exists_NotFound_Ok&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.ExecuteCommand_Ok&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

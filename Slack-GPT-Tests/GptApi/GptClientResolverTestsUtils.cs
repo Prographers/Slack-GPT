@@ -11,48 +11,35 @@ public static class GptClientResolverTestsUtils
     ///     Resolves a list of strings to a list of chat prompts and a GPT request. This is only for testing purposes.
     /// </summary>
     /// <param name="resolver"></param>
+    /// <param name="userId"></param>
     /// <param name="prompts"></param>
     /// <returns></returns>
-    public static ChatRequest TestParseRequest(this GptClientResolver resolver, params (string user, string prompt)[] prompts)
+    public static ChatRequest TestParseRequest(this GptClientResolver resolver, string? userId,
+        params (string user, string prompt)[] prompts)
     {
         var gptRequest = GptRequest.Default(new GptDefaults());
         var chatPrompts = new List<WritableChatPrompt>();
         foreach (var (user, prompt) in prompts)
         {
-            chatPrompts.Add(new WritableChatPrompt(user, prompt));
+            chatPrompts.Add(new WritableChatPrompt(user, userId, prompt));
         }
+
+        gptRequest.UserId = userId;
         gptRequest.Prompt = chatPrompts.Last(chatPrompt => chatPrompt.Role == "user").Content;
         return resolver.ParseRequest(chatPrompts, gptRequest);
     }
     
     /// <summary>
-    ///     Resolves a list of strings to a list of chat prompts and a GPT request.
+    ///     Resolves a list of strings to a list of chat prompts and a GPT request. This is only for testing purposes.
+    ///     By default, the user ID is "U123ID".
     /// </summary>
+    /// <param name="resolver"></param>
     /// <param name="prompts"></param>
-    /// <param name="gptDefaults"></param>
-    /// <param name="chatPrompts"></param>
-    /// <param name="request"></param>
-    public static void ResolveStringArrayToPromptsAndRequest(List<string> prompts,
-        GptDefaults gptDefaults,
-        out List<WritableChatPrompt> chatPrompts,
-        out GptRequest request)
+    /// <returns></returns>
+    public static ChatRequest TestParseRequest(this GptClientResolver resolver,
+        params (string user, string prompt)[] prompts)
     {
-        var context = new List<WritableChatPrompt>();
-        var botMention = "@GPT";
-        foreach (var prompt in prompts)
-        {
-            if (prompt.StartsWith(botMention))
-            {
-                var promptText = prompt.Replace(botMention, string.Empty).Trim();
-                context.Add(new WritableChatPrompt("assistant", promptText));
-            }
-            else context.Add(new WritableChatPrompt("user", prompt));
-        }
-
-        chatPrompts = context;
-        var userPrompt = chatPrompts.Last(chatPrompt => chatPrompt.Role == "user");
-        request = GptRequest.Default(gptDefaults);
-        request.UserId = "test";
-        request.Prompt = userPrompt.Content;
+        return TestParseRequest(resolver, "U123ID", prompts);
     }
+
 }
