@@ -317,4 +317,85 @@ public class CommandHandlerTests
         // Assert
         AssertCommandResult(response, "No release found");
     }
+    
+    [Test]
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task CommandsCommand_AddOverwrite_Ok(bool isGlobal)
+    {
+        // Arrange
+        var addCommand1 = new SlashCommand
+        {
+            Text = $"commands add -command prompt1 {(isGlobal ? "-global" : "")}",
+            UserId = "U0123ID"
+        };
+        var addCommand2 = new SlashCommand
+        {
+            Text = $"commands add -command prompt2 {(isGlobal ? "-global" : "")}",
+            UserId = "U0123ID"
+        };
+        var listCommand = new SlashCommand
+        {
+            Text = "commands",
+            UserId = "U0123ID"
+        };
+        var listCommandDetails = new SlashCommand
+        {
+            Text = "commands help -command",
+            UserId = "U0123ID"
+        };
+
+
+        // Act
+        var add1 = await _commandManager.Execute(addCommand1);
+        var add2 = await _commandManager.Execute(addCommand2);
+        var list = await _commandManager.Execute(listCommand);
+        var listDetails = await _commandManager.Execute(listCommandDetails);
+
+        // Assert
+        AssertCommandResult(add1, "Added command");
+        AssertCommandResult(add2, "already exists");
+        AssertCommandResult(list, "-command");
+        AssertCommandResult(listDetails, "prompt1");
+    }
+    
+    [Test]
+    public async Task CommandsCommand_RemoveSingle_Ok()
+    {
+        // Arrange
+        var addCommand1 = new SlashCommand
+        {
+            Text = $"commands add -command prompt1 -global",
+            UserId = "U0123ID"
+        };
+        var addCommand2 = new SlashCommand
+        {
+            Text = $"commands add -command prompt2",
+            UserId = "U0123ID"
+        };
+        var listCommand = new SlashCommand
+        {
+            Text = "commands",
+            UserId = "U0123ID"
+        };
+        var removeCommand = new SlashCommand
+        {
+            Text = "commands remove -command",
+            UserId = "U0123ID"
+        };
+
+        // Act
+        var add1 = await _commandManager.Execute(addCommand1);
+        var add2 = await _commandManager.Execute(addCommand2);
+        var list1 = await _commandManager.Execute(listCommand);
+        var remove1 = await _commandManager.Execute(removeCommand);
+        var list2 = await _commandManager.Execute(listCommand);
+
+        // Assert
+        AssertCommandResult(add1, "Added command");
+        AssertCommandResult(add2, "already exists");
+        AssertCommandResult(list1, "-command [Global]");
+        AssertCommandResult(remove1, "Removed command -command.");
+        AssertCommandResult(list2, "No commands found.");
+    }
 }

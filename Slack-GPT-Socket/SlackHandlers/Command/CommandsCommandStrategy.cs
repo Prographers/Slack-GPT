@@ -127,7 +127,12 @@ public class CommandsCommandStrategy : ICommandStrategy
                 ? null
                 : command.UserId
         };
-        _userCommandDb.AddCommand(newCommand);
+        if (!_userCommandDb.AddCommand(newCommand))
+        {
+            return CommandStrategyUtils.SlashCommandResponse(
+                $"Command {newCommand.Command} already exists. " +
+                $"Use /commands remove {newCommand.Command} to remove it first.");
+        }
         return CommandStrategyUtils.SlashCommandResponse(
             $"Added command {newCommand.Command} described as {newCommand.Description}\n" +
             $"\tPrompt:{newCommand.Prompt}.\n" +

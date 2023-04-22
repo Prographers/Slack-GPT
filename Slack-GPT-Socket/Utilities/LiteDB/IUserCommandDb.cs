@@ -19,7 +19,7 @@ public interface IUserCommandDb
     ///     Adds a command to the database.
     /// </summary>
     /// <param name="command"></param>
-    void AddCommand(GptUserCommand command);
+    bool AddCommand(GptUserCommand command);
     
     /// <summary>
     ///     Removes a command from the database.
