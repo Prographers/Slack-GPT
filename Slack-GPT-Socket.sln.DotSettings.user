@@ -19,5 +19,6 @@
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.CommandsCommand_AddSameCommand_MultipleUsers_CannotRemove&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.WhatsNewCommand_Ok&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.WhatsNewCommand_Error&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.TestLiteDB.TestNullConnectionString_Ok&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

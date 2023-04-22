@@ -15,7 +15,9 @@ builder.Services.Configure<GptDefaults>(builder.Configuration.GetSection("GptDef
 
 builder.Services.AddSingleton<GptClient>();
 builder.Services.AddSingleton<GptCustomCommands>();
-builder.Services.AddSingleton<ILiteDatabase>(x => new LiteDatabase(builder.Configuration.GetConnectionString("LiteDB")));
+builder.Services.AddSingleton<ILiteDatabase>(x => 
+    new LiteDatabase(builder.Configuration.GetConnectionString("LiteDB") ?? "Filename=:memory:;Mode=Memory;Cache=Shared")
+);
 
 builder.Services.AddSingleton<IUserCommandDb, UserCommandDb>();
 

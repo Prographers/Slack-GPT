@@ -15,7 +15,7 @@ public class UserCommandDb : IUserCommandDb
         _commands.EnsureIndex(x => x.Command);
         _commands.EnsureIndex(x => x.UserId);
     }
-
+    
     /// <inheritdoc />
     public GptUserCommand? FindCommand(string command, string? userId = null)
     {

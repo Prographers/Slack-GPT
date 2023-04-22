@@ -8,7 +8,9 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.scope=slack-gpt"
     volumes:
-      - ./appsettings.json:/app/appsettings.json
+      # See appsettings.json.example for configuration this file is required
+      - ./appsettings.json:/app/appsettings.json 
+      - slack-gpt-liteDB:/app/app.db
 
   watchtower-slack-gpt:
     image: containrrr/watchtower
