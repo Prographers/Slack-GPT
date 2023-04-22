@@ -13,7 +13,7 @@ public class GptCommand
     public string Command
     {
         get => _command;
-        set => _command = value.ToLower();
+        set => _command = value?.ToLower();
     }
 
     /// <summary>

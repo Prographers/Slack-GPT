@@ -30,6 +30,8 @@ public class CommandManager
         AddCommandStrategy(new HelpCommandStrategy(gptDefaults, botInfo, customCommands, userCommandDb,
             parameterManager));
         AddCommandStrategy(new StatusCommandStrategy());
+        AddCommandStrategy(new CommandsCommandStrategy(userCommandDb));
+        AddCommandStrategy(new WhatsNewCommandStrategy());
     }
 
 
