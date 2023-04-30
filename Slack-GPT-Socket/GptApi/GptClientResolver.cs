@@ -181,22 +181,21 @@ public class GptClientResolver
         // update last index to check if we've reached the end of the parameters
         var paramNameIndex = input.Prompt.IndexOf(args.Name, StringComparison.InvariantCultureIgnoreCase);
 
-        int paramEndIndex;
         string searchString;
         // Determine if the parameter has a value, because if it doesn't we don't want to remove it from the prompt!
         if (args.HasValue)
         {
-            paramEndIndex = paramNameIndex + args.Name.Length + args.Value.Length + 2;
-            searchString = args.Name + " " + args.ValueRaw + " ";
+            // Find last index of this value args.ValueRaw
+            var paramValueIndex = input.Prompt.IndexOf(args.ValueRaw, StringComparison.InvariantCultureIgnoreCase) + args.ValueRaw.Length + 1;
+            lastIndex = paramValueIndex;
+            input.Prompt = input.Prompt.Substring(paramValueIndex, input.Prompt.Length - paramValueIndex).Trim();
+            return;
         }
         else
         {
-            paramEndIndex = paramNameIndex + args.Name.Length + 2;
+            lastIndex = paramNameIndex + args.Name.Length + 2;
             searchString = args.Name + " ";
+            input.Prompt = input.Prompt.Replace(searchString, "").Trim();
         }
-
-        // Update last index to check if we've reached the end of the parameters
-        lastIndex = paramEndIndex;
-        input.Prompt = input.Prompt.Replace(searchString, "").Trim();
     }
 }
