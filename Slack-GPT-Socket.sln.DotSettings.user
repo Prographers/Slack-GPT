@@ -1,4 +1,19 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=518a87a3_002D49c7_002D40fb_002Dbec1_002D478ce2091847/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GptClientEdgeCasesTests_1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientEdgeCasesTests.GptClientEdgeCasesTests_1&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=7a21a381_002D1bd7_002D4190_002Daea7_002D60bbc3080eac/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GptClientEdgeCasesTests_1 #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientEdgeCasesTests.GptClientEdgeCasesTests_1&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=bc0f8e87_002D43a6_002D4830_002D802e_002Db69debc2f54b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GptClientEdgeCasesTests_1 #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientEdgeCasesTests.GptClientEdgeCasesTests_1&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
 	
 	
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e72966db_002D060a_002D4577_002D858b_002D3601c1cb06de/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ContextBlockSanitation_OK" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
@@ -22,5 +37,7 @@
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.TestLiteDB.TestNullConnectionString_Ok&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.CommandsCommand_AddOverwrite_Ok&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.CommandsCommand_RemoveSingle_Ok&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientEdgeCasesTests.GptClientEdgeCasesTests_1&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientEdgeCasesTests.GptClientEdgeCases_Ok&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

@@ -126,9 +126,11 @@ public class GptClientResolver
     private void ResolveParameters(ref GptRequest input)
     {
         var lastIndex = 0;
-        Match match;
-
-        while ((match = ParameterRegex.Match(input.Prompt)).Success)
+        Match match = ParameterRegex.Match(input.Prompt);
+        
+        if(!match.Success) return;
+        
+        do
         {
             var paramName = match.Groups[1].Value;
             var paramValueTrim = match.Groups[2]?.Value.Trim() ?? string.Empty;
@@ -163,7 +165,7 @@ public class GptClientResolver
                 // if we get an exception, we'll just ignore the parameter and move on
                 break;
             }
-        }
+        } while ((match = match.NextMatch()).Success);
     }
 
     /// <summary>

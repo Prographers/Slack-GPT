@@ -3,3 +3,5 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+/Slack-GPT-Socket/app-log.db
+/Slack-GPT-Socket/app.db
