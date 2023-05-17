@@ -225,7 +225,14 @@ internal class SlackMentionHandler : IEventHandler<AppMention>
         {
             var result = await _gptClient.GeneratePrompt(context, userId);
 
-            if (HasError(result) && result.Error!.Contains("The server had an error while processing your request. Sorry about that"))
+            var repeatOnErrorsArray = new string[]
+            {
+                "The server had an error while processing your request",
+                "That model is currently overloaded with other requests",
+                "The server is currently overloaded with other requests",
+            };
+                
+            if (HasError(result) && result.Error!.Contains(repeatOnErrorsArray))
             {
                 if (errorsCount == 0)
                 {

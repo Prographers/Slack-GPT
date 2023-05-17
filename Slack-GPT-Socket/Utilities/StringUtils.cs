@@ -74,4 +74,14 @@ public static class StringUtils
                         || char.IsPunctuation(x) || char.IsSeparator(x))).Replace(",", ".");
     }
     
+    /// <summary>
+    ///     Checks if a string contains any of the given values.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="values"></param>
+    /// <returns></returns>
+    public static bool Contains(this string input, IEnumerable<string> values)
+    {
+        return values.Any(input.Contains);
+    }
 }
