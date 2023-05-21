@@ -18,12 +18,15 @@ public class SlackCommandHandler : ISlashCommandHandler
     public SlackCommandHandler(
         GptCustomCommands customCommands,
         SlackBotInfo botInfo,
+        ISlackApiClient slackApiClient,
+        GptClient gptClient,
         IUserCommandDb userCommandDb,
         IOptions<GptDefaults> gptDefaults,
+        IOptions<SlackSettings> slackSettings,
         ILogger<SlackCommandHandler> log)
     {
         _commandManager =
-            new CommandManager(customCommands, botInfo, userCommandDb, gptDefaults.Value, log);
+            new CommandManager(slackApiClient, gptClient, slackSettings.Value, customCommands, botInfo, userCommandDb, gptDefaults.Value, log);
     }
 
 

@@ -42,7 +42,7 @@ public class CommandsCommandStrategy : ICommandStrategy
                 return HelpCommand(command, restOfCommand);
         }
 
-        return CommandStrategyUtils.SlashCommandResponse("Command not found.");
+        return CommandStrategyUtils.SlashCommandResponse("Command not found. Type /help or /generate to get started.");
     }
 
     /// <summary>

@@ -34,6 +34,7 @@ public class CommandHandlerTests
             }
         };
         _commandManager = new CommandManager(
+            null, null, null,
             _customCommands, _botInfo, _userCommandDb, _gptDefaults, null
         );
     }

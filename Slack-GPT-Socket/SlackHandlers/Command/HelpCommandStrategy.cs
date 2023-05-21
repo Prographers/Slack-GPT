@@ -75,6 +75,7 @@ public class HelpCommandStrategy : ICommandStrategy
         sb.AppendLine();
         sb.AppendLine("You can also use the following commands:");
         sb.AppendLine(" - `/gpt help` - Display this help");
+        sb.AppendLine(" - `/gpt generate <prompt>` - Generate text from the prompt. Very limited, please use chat channel or mention instead.");
         sb.AppendLine(" - `/gpt status` - Get the status of the bot");
         sb.AppendLine(" - `/gpt commands` - List all commands");
         sb.AppendLine(" - `/gpt whatsNew` - List the latest changes");

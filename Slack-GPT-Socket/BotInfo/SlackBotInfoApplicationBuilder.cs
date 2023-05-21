@@ -25,11 +25,26 @@ public static class SlackBotInfoApplicationBuilder
     /// <returns></returns>
     public static IApplicationBuilder UseSlackBotInfo(this IApplicationBuilder builder)
     {
+        var task = UseSlackBotInfoAsync(builder);
+        task.Wait();
+        return builder;
+    }
+
+    private static async Task UseSlackBotInfoAsync(IApplicationBuilder builder)
+    {
+        var logger = builder.ApplicationServices.GetRequiredService<ILogger<SlackBotInfo>>();
         var slackApiClient = builder.ApplicationServices.GetRequiredService<ISlackApiClient>();
         var slackBotInfo = builder.ApplicationServices.GetRequiredService<SlackBotInfo>();
-        var botInfoTask =  slackApiClient.Auth.Test();
-        botInfoTask.Wait();
-        slackBotInfo.BotInfo = botInfoTask.Result;
-        return builder;
+        
+        Task.WaitAll(new[]
+        {
+            SetBotInfo(slackApiClient, slackBotInfo, logger),
+        });
+    }
+
+    private static async Task SetBotInfo(ISlackApiClient slackApiClient, SlackBotInfo slackBotInfo, ILogger<SlackBotInfo> logger)
+    {
+        var botInfoTask = await slackApiClient.Auth.Test();
+        slackBotInfo.BotInfo = botInfoTask;
     }
 }

@@ -1,3 +1,4 @@
+using SlackNet;
 using SlackNet.WebApi;
 
 namespace Slack_GPT_Socket;

@@ -12,6 +12,7 @@ var settings = builder.Configuration.GetSection("Api").Get<ApiSettings>()!;
 builder.Services.AddOptions<ApiSettings>().Bind(builder.Configuration.GetSection("Api"));
 builder.Services.Configure<GptCommands>(builder.Configuration.GetSection("GptCommands"));
 builder.Services.Configure<GptDefaults>(builder.Configuration.GetSection("GptDefaults"));
+builder.Services.Configure<SlackSettings>(builder.Configuration.GetSection("Slack"));
 
 builder.Services.AddSingleton<GptClient>();
 builder.Services.AddSingleton<GptCustomCommands>();
@@ -25,6 +26,7 @@ builder.Services.AddSlackNet(c => c
     .UseApiToken(settings.SlackBotToken)
     .UseAppLevelToken(settings.SlackAppToken)
     .RegisterEventHandler<AppMention, SlackMentionHandler>()
+    .RegisterEventHandler<MessageEvent, SlackMessageHandler>()
     .RegisterSlashCommandHandler<SlackCommandHandler>("/gpt")
 );
 
