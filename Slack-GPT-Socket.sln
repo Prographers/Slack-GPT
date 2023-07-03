@@ -1,8 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slack-GPT-Socket", "Slack-GPT-Socket\Slack-GPT-Socket.csproj", "{C3ADDB04-692E-4700-B264-F3009A0D245E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackGptSocket", "SlackGptSocket\SlackGptSocket.csproj", "{C3ADDB04-692E-4700-B264-F3009A0D245E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slack-GPT-Tests", "Slack-GPT-Tests\Slack-GPT-Tests.csproj", "{8513CAC6-F4FB-4821-B229-7B2E31E1DA66}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackGptTests", "SlackGptTests\SlackGptTests.csproj", "{8513CAC6-F4FB-4821-B229-7B2E31E1DA66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GptCore", "GptCore\GptCore.csproj", "{8A3AC4F1-E422-4D40-BD3A-AF441914F913}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +20,9 @@ Global
 		{8513CAC6-F4FB-4821-B229-7B2E31E1DA66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8513CAC6-F4FB-4821-B229-7B2E31E1DA66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8513CAC6-F4FB-4821-B229-7B2E31E1DA66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A3AC4F1-E422-4D40-BD3A-AF441914F913}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A3AC4F1-E422-4D40-BD3A-AF441914F913}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A3AC4F1-E422-4D40-BD3A-AF441914F913}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A3AC4F1-E422-4D40-BD3A-AF441914F913}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

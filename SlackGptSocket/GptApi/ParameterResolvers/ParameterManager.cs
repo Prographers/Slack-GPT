@@ -1,0 +1,87 @@
+﻿using System.Collections;
+using SlackGptSocket.Settings;
+using SlackGptSocket.Utilities.LiteDB;
+
+namespace SlackGptSocket.GptApi.ParameterResolvers;
+
+public class ParameterManager : IEnumerable<IParameterResolver>
+{
+    private readonly List<IParameterResolver> _resolvers;
+
+    /// <summary>
+    ///     Model aliases for quick access
+    /// </summary>
+    private ModelInfo[] _models = new ModelInfo[]
+    {
+        new("gpt-4", "gpt4"),
+        new("gpt-3.5-turbo", "chatgpt", "gpt-3", "gpt3", "turbo")
+    };
+
+    
+    public ParameterManager(GptCustomCommands customCommands,
+        GptDefaults gptDefaults, IUserCommandDb userCommandDb)
+    {
+        _resolvers = new List<IParameterResolver>
+        {
+            new MaxTokenResolver(),
+            new TemperatureResolver(),
+            new TopPResolver(),
+            new PresencePenaltyResolver(),
+            new FrequencyPenaltyResolver(),
+            new ModelResolver(Models),
+            new SystemResolver(),
+            new ContextResolver(),
+            new PredefinedCommandResolver(customCommands),
+            new UsersCommandResolver(userCommandDb)
+        };
+    }
+
+    /// <summary>
+    ///     Gets the models that are available.
+    /// </summary>
+    public ModelInfo[] Models => _models;
+    
+
+    /// <summary>
+    ///     Tries to resolve the parameter.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    public bool TryResolve(GptRequest input, ParameterEventArgs args)
+    {
+        var resolved = false;
+        foreach (var resolver in _resolvers)
+        {
+            if (!resolver.CanHandle(args)) continue;
+
+            resolver.Resolve(input, args);
+            resolved = true;
+            if (!args.PassThrough) return resolved;
+        }
+
+        return resolved;
+    }
+    
+    public int Count => _resolvers.Count;
+    
+    /// <summary>
+    ///     Gets the resolver at the given index.
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    public IParameterResolver GetResolver(int index)
+    {
+        return _resolvers[index];
+    }
+
+    public IEnumerator<IParameterResolver> GetEnumerator()
+    {
+        return _resolvers.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+}
