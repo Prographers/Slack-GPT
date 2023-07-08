@@ -112,7 +112,6 @@ public class SlackMessageEventBaseHandler
         return context;
     }
 
-
     /// <summary>
     ///     Generates a prompt using the GPT client.
     /// </summary>

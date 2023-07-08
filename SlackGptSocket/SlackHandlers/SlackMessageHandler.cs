@@ -28,7 +28,7 @@ public class SlackMessageHandler : IEventHandler<MessageEventBase>
         _botInfo = botInfo;
         _slackSettings = slackSettings;
 
-        _handler = new SlackMessageEventBaseHandler(slack, log, gptClient, botInfo, 
+        _handler = new SlackMessageEventBaseHandler(slack, log, gptClient, botInfo,
             slackSettings.Value);
     }
 
@@ -43,10 +43,10 @@ public class SlackMessageHandler : IEventHandler<MessageEventBase>
 
         _handler.RemoveMentionsFromText(slackEvent);
 
-        var context = await  _handler.ResolveConversationContextWithMentions(slackEvent);
+        var context = await _handler.ResolveConversationContextWithMentions(slackEvent);
 
         await SlackMessageFormat.PostLoadingMessage(_slack, slackEvent);
 
-        await  _handler.HandleNewGptRequest(slackEvent, context);
+        await _handler.HandleNewGptRequest(slackEvent, context);
     }
 }

@@ -6,7 +6,6 @@ using SlackGptSocket.BotInfo;
 using SlackGptSocket.GptApi;
 using SlackGptSocket.Settings;
 using SlackGptSocket.SlackHandlers.Command;
-using SlackGptSocket.Utilities.LiteDB;
 using SlackNet;
 using SlackNet.Interaction;
 
@@ -18,7 +17,7 @@ namespace SlackGptSocket.SlackHandlers;
 public class SlackCommandHandler : ISlashCommandHandler
 {
     private readonly CommandManager _commandManager;
-    
+
     public SlackCommandHandler(
         GptCustomCommands customCommands,
         SlackBotInfo botInfo,
@@ -30,7 +29,8 @@ public class SlackCommandHandler : ISlashCommandHandler
         ILogger<SlackCommandHandler> log)
     {
         _commandManager =
-            new CommandManager(slackApiClient, gptClient, slackSettings.Value, customCommands, botInfo, userCommandDb, gptDefaults.Value, log);
+            new CommandManager(slackApiClient, gptClient, slackSettings.Value, customCommands, botInfo, userCommandDb,
+                gptDefaults.Value, log);
     }
 
 

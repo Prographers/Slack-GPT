@@ -24,13 +24,13 @@ internal class SlackMentionHandler : IEventHandler<MessageEventBase>
 
     public SlackMentionHandler(ISlackApiClient slack, ILogger<SlackMentionHandler> log, GptClient gptClient,
         SlackBotInfo botInfo, IOptions<SlackSettings> slackSettings)
-    { 
+    {
         _slack = slack;
         _log = log;
         _gptClient = gptClient;
         _botInfo = botInfo;
-        
-        _handler = new SlackMessageEventBaseHandler(slack, log, gptClient, botInfo, 
+
+        _handler = new SlackMessageEventBaseHandler(slack, log, gptClient, botInfo,
             slackSettings.Value);
     }
 
@@ -48,6 +48,6 @@ internal class SlackMentionHandler : IEventHandler<MessageEventBase>
 
         await SlackMessageFormat.PostLoadingMessage(_slack, slackEvent);
 
-        await _handler.HandleNewGptRequest(slackEvent, context);    
+        await _handler.HandleNewGptRequest(slackEvent, context);
     }
 }

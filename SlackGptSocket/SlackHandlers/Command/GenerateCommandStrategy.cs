@@ -1,13 +1,11 @@
-﻿using SlackGptSocket.SlackHandlers.Utilities;
-using SlackNet;
-using SlackNet.Events;
+﻿using SlackNet.Events;
 using SlackNet.Interaction;
 
 namespace SlackGptSocket.SlackHandlers.Command;
 
 public class GenerateCommandStrategy : ICommandStrategy
 {
-    private SlackMessageEventBaseHandler _handler;
+    private readonly SlackMessageEventBaseHandler _handler;
 
     public GenerateCommandStrategy(SlackMessageEventBaseHandler handler)
     {
@@ -15,15 +13,16 @@ public class GenerateCommandStrategy : ICommandStrategy
     }
 
     public string Command => "generate";
+
     public async Task<SlashCommandResponse> Execute(SlashCommand command)
     {
         command.Text = command.Text.Substring(Command.Length).Trim();
-        
+
         await CommandHandler(command);
 
         return CommandStrategyUtils.SlashCommandResponse(SlackLoadingMessage.GetRandomLoadingMessage());
     }
-    
+
     /// <summary>
     ///     Handles SlashCommand events and responds as if this is a message in bot's chat that will generate an answer form
     ///     OpenAI GPT.
@@ -43,9 +42,9 @@ public class GenerateCommandStrategy : ICommandStrategy
         };
 
         _handler.RemoveMentionsFromText(slackEvent);
-        
+
         var context = await _handler.ResolveConversationContextWithMentions(slackEvent);
-        
+
         await _handler.HandleNewGptRequest(slackEvent, context);
     }
 }

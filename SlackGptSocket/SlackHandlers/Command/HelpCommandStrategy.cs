@@ -4,9 +4,6 @@ using GptCore.Database;
 using GptCore.ParameterResolvers.Common;
 using GptCore.Settings;
 using SlackGptSocket.BotInfo;
-using SlackGptSocket.GptApi;
-using SlackGptSocket.Settings;
-using SlackGptSocket.Utilities.LiteDB;
 using SlackNet.Interaction;
 
 namespace SlackGptSocket.SlackHandlers.Command;

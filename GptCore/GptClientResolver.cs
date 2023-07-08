@@ -2,6 +2,7 @@
 using GptCore.Database;
 using GptCore.ParameterResolvers.Common;
 using GptCore.Settings;
+using OpenAI;
 using OpenAI.Chat;
 
 namespace GptCore;
@@ -9,20 +10,25 @@ namespace GptCore;
 /// <summary>
 ///     Represents a GPT client resolver. Provide list of chat prompts and a GPT request to parse to.
 /// </summary>
-public class GptClientResolver
+public class GptClientResolver : IGptClientResolver
 {
     private static readonly Regex ParameterRegex =
         new("""(-(?>\w|-)+)((\s+"[^"]+")|\s+\S+)?""", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
-
     private readonly ParameterManager _parameterManager;
     private readonly GptDefaults _gptDefaults;
+    private readonly OpenAIClient _api;
 
-    public GptClientResolver(GptCustomCommands customCommands, GptDefaults gptDefaults, IUserCommandDb userCommandDb)
+    public GptClientResolver(
+        GptCustomCommands customCommands,
+        GptDefaults gptDefaults,
+        IUserCommandDb userCommandDb,
+        string openAiKey,
+        HttpClient httpClient)
     {
         _gptDefaults = gptDefaults;
-
         _parameterManager = new ParameterManager(customCommands, gptDefaults, userCommandDb);
+        _api = new OpenAIClient(openAiKey, OpenAIClientSettings.Default, httpClient);
     }
 
     /// <summary>
@@ -80,12 +86,25 @@ public class GptClientResolver
 
         return chatRequest;
     }
+    
+    /// <summary>
+    ///     Resolves the parameters in the given GPT request.
+    /// </summary>
+    /// <param name="chatRequest"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task<ChatResponse> GetCompletionAsync(
+        ChatRequest chatRequest, 
+        CancellationToken cancellationToken = default(CancellationToken))
+    {
+        return await _api.ChatEndpoint.GetCompletionAsync(chatRequest, cancellationToken);
+    }
 
     /// <summary>
     ///     Resolves the model to be used for the given input.
     /// </summary>
     /// <param name="input">The GPT request input.</param>
-    private void ResolveModel(ref GptRequest input)
+    protected void ResolveModel(ref GptRequest input)
     {
         var promptWords = input.Prompt.Split(' ');
         var firstWord = promptWords[0].ToLower(); // extract first word of the prompt
@@ -123,7 +142,7 @@ public class GptClientResolver
     ///     Resolves additional parameters for the given input.
     /// </summary>
     /// <param name="input">The GPT request input.</param>
-    private void ResolveParameters(ref GptRequest input)
+    protected void ResolveParameters(ref GptRequest input)
     {
         var lastIndex = 0;
         Match match = ParameterRegex.Match(input.Prompt);
@@ -175,7 +194,7 @@ public class GptClientResolver
     /// <param name="input">Input that will be processed</param>
     /// <param name="args">Command solver arguments</param>
     /// <param name="lastIndex">Last input index for tracking how far we are into the processing</param>
-    private static void TrimInputFromParameter(GptRequest input, ParameterEventArgs args, ref int lastIndex)
+    protected void TrimInputFromParameter(GptRequest input, ParameterEventArgs args, ref int lastIndex)
     {
         // Trim the input Prompt to remove the parameter,
         // update last index to check if we've reached the end of the parameters

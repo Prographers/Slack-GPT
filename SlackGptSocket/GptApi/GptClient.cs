@@ -2,7 +2,6 @@
 using GptCore.Database;
 using GptCore.Settings;
 using Microsoft.Extensions.Options;
-using OpenAI;
 using SlackGptSocket.Settings;
 using SlackGptSocket.Utilities.LiteDB;
 
@@ -13,10 +12,9 @@ namespace SlackGptSocket.GptApi;
 /// </summary>
 public class GptClient
 {
-    private readonly OpenAIClient _api;
     private readonly ILogger _log;
     private readonly GptDefaults _gptDefaults;
-    private readonly GptClientResolver _resolver;
+    private readonly IGptClientResolver _resolver;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="GptClient" /> class.
@@ -35,10 +33,14 @@ public class GptClient
         {
             Timeout = TimeSpan.FromMinutes(10)
         };
-        _api = new OpenAIClient(settings.Value.OpenAIKey, OpenAIClientSettings.Default, httpClient);
         _log = log;
         _gptDefaults = gptDefaults.Value;
-        _resolver = new GptClientResolver(customCommands, _gptDefaults, userCommandDb);
+        _resolver = new GptClientResolver(
+            customCommands,
+            _gptDefaults,
+            userCommandDb, 
+            settings.Value.OpenAIKey, 
+            httpClient);
     }
 
     /// <summary>
@@ -59,7 +61,7 @@ public class GptClient
 
         try
         {
-            var result = await _api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            var result = await _resolver.GetCompletionAsync(chatRequest);
             _log.LogInformation("GPT response: {Response}", result.FirstChoice);
 
             return new GptResponse

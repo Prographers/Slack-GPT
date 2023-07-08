@@ -8,7 +8,7 @@ public static class SlackLoadingMessage
     /// <summary>
     ///     Messages to display while starting to load
     /// </summary>
-    private static readonly string[] LoadingMessages = new []
+    private static readonly string[] LoadingMessages =
     {
         "Let me think about that for a second...",
         "Crunching, crunching, crunching...",
@@ -29,13 +29,13 @@ public static class SlackLoadingMessage
         "Loading... Don't worry, I'm just taking a coffee break.",
         "If patience is a virtue, you're about to become a saint. I'm loading...",
         "I'm running on caffeine and code. I'll be with you shortly!",
-        "Slack GPT plugin was made by https://prographers.com/ come check us out! :)",
+        "Slack GPT plugin was made by https://prographers.com/ come check us out! :)"
     };
 
     /// <summary>
     ///     Messages to display while waiting for a long response
     /// </summary>
-    private static readonly string[] LongWaitMessages = new[]
+    private static readonly string[] LongWaitMessages =
     {
         "Just a moment, I'm still gathering my thoughts...",
         "Hold on, I'm crunching the numbers for you, and there is a lot of numbers...",
@@ -59,7 +59,7 @@ public static class SlackLoadingMessage
         "Just a moment, I'm consulting my crystal ball...",
         "Fun fact, GPT is generating response word by word, so it takes a while to generate a long response."
     };
-    
+
     /// <summary>
     ///     Gets a random loading message
     /// </summary>
@@ -68,7 +68,7 @@ public static class SlackLoadingMessage
     {
         return LoadingMessages[new Random().Next(0, LoadingMessages.Length)];
     }
-    
+
     /// <summary>
     ///     Gets a random long wait message
     /// </summary>
