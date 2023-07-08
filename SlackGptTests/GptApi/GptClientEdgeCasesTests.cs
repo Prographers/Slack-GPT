@@ -15,9 +15,7 @@ public class GptClientEdgeCasesTests
     public void Setup()
     {
         _gptDefaults = new GptDefaults();
-        _customCommands = new GptCustomCommands(MoqUtils.CreateOptionsMonitorMock(
-            new GptCommands()
-        ));
+        _customCommands = new GptCustomCommands(new GptCommands());
         var userCommandDb = new UserCommandDb(new LiteDatabase("Filename=:memory:;Mode=Memory;Cache=Shared"));
         _resolver = new GptClientResolver(_customCommands, _gptDefaults, userCommandDb);
     }

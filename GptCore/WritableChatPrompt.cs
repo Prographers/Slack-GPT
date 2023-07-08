@@ -1,8 +1,14 @@
+using OpenAI.Chat;
+
 namespace SlackGptSocket.GptApi;
 
 /// <summary>
 ///     Represents a writable chat prompt used for generating AI responses.
 /// </summary>
+/// <remarks>
+///     This class is an open replacement for <see cref="ChatPrompt"/> from <see cref="OpenAI.Chat"/> to allow for
+///     in-flight modifications via property setters.
+/// </remarks>
 public sealed class WritableChatPrompt
 {
     /// <summary>

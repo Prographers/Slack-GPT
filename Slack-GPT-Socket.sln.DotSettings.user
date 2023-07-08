@@ -17,27 +17,5 @@
 	
 	
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e72966db_002D060a_002D4577_002D858b_002D3601c1cb06de/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ContextBlockSanitation_OK" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.TestContextBlockSanitation.ContextBlockSanitation_OK&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.TestApplicationClass.TestApplicationVersion_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientResolverTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientUserCommandsTests.ResolveParameters_UserCommand_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientUserCommandsTests.ResolveParameters_UserCommand_AddMultiple_Test_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientUserCommandsTests.ResolveParameters_UserCommand_Remove_NotFound_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientUserCommandsTests.ResolveParameters_UserCommand_Exists_NotFound_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.ExecuteCommand_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.HelpCommand_CustomGlobal_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.CommandsCommand_List_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.CommandsCommand_Add_And_List_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.CommandsCommand_AddRemove_And_List_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.CommandsCommand_AddRemove_And_List_CannotRemove&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.CommandsCommand_AddSameCommand_MultipleUsers_CannotRemove&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.WhatsNewCommand_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.WhatsNewCommand_Error&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.TestLiteDB.TestNullConnectionString_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.CommandsCommand_AddOverwrite_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.Handlers.CommandHandlerTests.CommandsCommand_RemoveSingle_Ok&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientEdgeCasesTests.GptClientEdgeCasesTests_1&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::8513CAC6-F4FB-4821-B229-7B2E31E1DA66::net7.0::Slack_GPT_Tests.GptApi.GptClientEdgeCasesTests.GptClientEdgeCases_Ok&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+  &lt;Project Location="D:\Projects\Node\Slack-GPT-Socket\SlackGptTests" Presentation="&amp;lt;SlackGptTests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
