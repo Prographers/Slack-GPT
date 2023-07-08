@@ -38,66 +38,12 @@ public class SlackMessageEventBaseHandler
     }
 
     /// <summary>
-    ///     Handles SlashCommand events and responds as if this is a message in bot's chat that will generate an answer form
-    ///     OpenAI GPT.
+    ///     Handles incoming MessageEventBase events and responds accordingly with a new GPT prompt or error message.
     /// </summary>
-    /// <param name="slashCommand"></param>
-    public async Task CommandHandler(SlashCommand slashCommand)
+    /// <param name="slackEvent">Slack event to use as a response</param>
+    /// <param name="context">List of messages to be passed as a context</param>
+    public async Task HandleNewGptRequest(MessageEventBase slackEvent, List<WritableChatPrompt> context)
     {
-        // Convert SlashCommand to MessageEventBase
-        var slackEvent = new AppMention
-        {
-            Channel = slashCommand.ChannelId,
-            User = slashCommand.UserId,
-            Text = slashCommand.Text,
-            Team = slashCommand.TeamId,
-            EventTs = slashCommand.TriggerId,
-            Ts = slashCommand.TriggerId
-        };
-
-        RemoveMentionsFromText(slackEvent);
-
-        var context = await ResolveConversationContext(slackEvent);
-
-        try
-        {
-            var text = await GeneratePrompt(slackEvent, context, slackEvent.User);
-
-            if (HasError(text))
-            {
-                await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "GptClient", slackEvent, text.Error);
-                return;
-            }
-
-            await SlackMessageFormat.PostGptResponseMessage(_slack, slackEvent, text, true);
-        }
-        catch (SlackException e)
-        {
-            await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "SlackException", slackEvent, e.Message,
-                string.Join("\n\t", e.ErrorMessages));
-        }
-        catch (Exception e)
-        {
-            await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "Unexpected", slackEvent, e.Message,
-                e.StackTrace);
-        }
-    }
-
-    /// <summary>
-    ///     Handles incoming MessageEventBase events and responds accordingly as if this is a message in bot's chat.
-    /// </summary>
-    /// <param name="slackEvent"></param>
-    public async Task MessageHandler(MessageEventBase slackEvent)
-    {
-        if (IsBot(slackEvent)) return;
-        if (!IsBotChannel(slackEvent) && _slackSettings.OnlyMentionsOutsideBotChannel) return;
-
-        RemoveMentionsFromText(slackEvent);
-
-        var context = await ResolveConversationContext(slackEvent);
-
-        await SlackMessageFormat.PostLoadingMessage(_slack, slackEvent);
-
         try
         {
             var text = await GeneratePrompt(slackEvent, context, slackEvent.User);
@@ -120,68 +66,6 @@ public class SlackMessageEventBaseHandler
             await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "Unexpected", slackEvent, e.Message,
                 e.StackTrace);
         }
-    }
-
-    /// <summary>
-    ///     Handles incoming MessageEventBase events and responds accordingly as if this is a mention.
-    /// </summary>
-    /// <param name="slackEvent">Data about the message</param>
-    public async Task MentionHandler(MessageEventBase slackEvent)
-    {
-        if (IsBot(slackEvent)) return;
-
-        RemoveMentionsFromText(slackEvent);
-
-        var context = await ResolveConversationContext(slackEvent);
-
-        await SlackMessageFormat.PostLoadingMessage(_slack, slackEvent);
-
-        try
-        {
-            var text = await GeneratePrompt(slackEvent, context, slackEvent.User);
-
-            if (HasError(text))
-            {
-                await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "GptClient", slackEvent, text.Error);
-                return;
-            }
-
-            await SlackMessageFormat.PostGptResponseMessage(_slack, slackEvent, text);
-        }
-        catch (SlackException e)
-        {
-            await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "SlackException", slackEvent, e.Message,
-                string.Join("\n\t", e.ErrorMessages));
-        }
-        catch (Exception e)
-        {
-            await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "Unexpected", slackEvent, e.Message,
-                e.StackTrace);
-        }
-    }
-
-    /// <summary>
-    ///     Checks if the event is triggered by a bot.
-    /// </summary>
-    /// <param name="slackEvent">The MessageEventBase event.</param>
-    /// <returns>True if the event is triggered by a bot, false otherwise.</returns>
-    private bool IsBot(MessageEventBase slackEvent)
-    {
-        return slackEvent.User == _botInfo.BotInfo.UserId;
-    }
-
-    /// <summary>
-    ///     Checks if the event is triggered on the bot's channel.
-    /// </summary>
-    /// <param name="slackEvent">The MessageEventBase event.</param>
-    /// <returns>True if the event is triggered on a bot channel, false otherwise.</returns>
-    private bool IsBotChannel(MessageEventBase slackEvent)
-    {
-        return slackEvent switch
-        {
-            MessageEvent { ChannelType: "im" } => true,
-            _ => false
-        };
     }
 
     /// <summary>
@@ -199,26 +83,26 @@ public class SlackMessageEventBaseHandler
     /// </summary>
     /// <param name="slackEvent">The MessageEventBase event.</param>
     /// <returns>A list of WritableChatPrompt instances representing the conversation context.</returns>
-    public async Task<List<WritableChatPrompt>> ResolveConversationContext(MessageEventBase slackEvent)
+    public async Task<List<WritableChatPrompt>> ResolveConversationContextWithMentions(MessageEventBase slackEvent)
     {
         var context = new List<WritableChatPrompt>();
 
         if (slackEvent.ThreadTs != null)
         {
             var replies = await _slack.Conversations.Replies(slackEvent.Channel, slackEvent.ThreadTs, slackEvent.Ts);
-            foreach (var reply in replies.Messages)
+            foreach (var message in replies.Messages)
             {
-                if (reply.IsBotReply(_botInfo))
+                if (message.IsBotReply(_botInfo))
                 {
-                    var response = SlackParserUtils.RemoveContextBlockFromResponses(reply);
+                    var response = SlackParserUtils.RemoveContextBlockFromResponses(message);
                     if (response != null) context.Add(new WritableChatPrompt("assistant", "__assistant__", response));
                 }
-                else if (reply.HasBotsMention(_botInfo))
+                else if (message.HasBotsMention(_botInfo))
                 {
-                    if (slackEvent.Ts == reply.Ts)
+                    if (slackEvent.Ts == message.Ts)
                         continue;
-                    var response = reply.Text.Replace("<@" + _botInfo.BotInfo.UserId + ">", "").Trim();
-                    context.Add(new WritableChatPrompt("user", reply.User, response));
+                    var response = message.Text.Replace("<@" + _botInfo.BotInfo.UserId + ">", "").Trim();
+                    context.Add(new WritableChatPrompt("user", message.User, response));
                 }
             }
         }
@@ -236,7 +120,7 @@ public class SlackMessageEventBaseHandler
     /// <param name="context">The chat context to be used in generating the prompt.</param>
     /// <param name="userId">The user ID to be used in generating the prompt.</param>
     /// <returns>A GPTResponse instance containing the generated prompt.</returns>
-    private async Task<GptResponse> GeneratePrompt(MessageEventBase slackEvent, List<WritableChatPrompt> context,
+    public async Task<GptResponse> GeneratePrompt(MessageEventBase slackEvent, List<WritableChatPrompt> context,
         string userId)
     {
         // Start the periodic SendMessageProcessing task
@@ -295,14 +179,13 @@ public class SlackMessageEventBaseHandler
             else return result;
         }
     }
-
-
+    
     /// <summary>
     ///     Checks if the given GPT response has an error.
     /// </summary>
     /// <param name="text">The GPT response to check.</param>
     /// <returns>True if the response has an error, false otherwise.</returns>
-    private bool HasError(GptResponse text)
+    public bool HasError(GptResponse text)
     {
         return text.Error != null;
     }

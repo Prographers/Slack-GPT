@@ -2,6 +2,7 @@
 using SlackGptSocket.BotInfo;
 using SlackGptSocket.GptApi;
 using SlackGptSocket.Settings;
+using SlackGptSocket.SlackHandlers.Utilities;
 using SlackNet;
 using SlackNet.Events;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -37,6 +38,15 @@ public class SlackMessageHandler : IEventHandler<MessageEventBase>
     /// <param name="slackEvent">The MessageEventBase event.</param>
     public async Task Handle(MessageEventBase slackEvent)
     {
-        await _handler.MessageHandler(slackEvent);
+        if (slackEvent.IsBot(_botInfo)) return;
+        if (!slackEvent.IsBotChannel() && _slackSettings.Value.OnlyMentionsOutsideBotChannel) return;
+
+        _handler.RemoveMentionsFromText(slackEvent);
+
+        var context = await  _handler.ResolveConversationContextWithMentions(slackEvent);
+
+        await SlackMessageFormat.PostLoadingMessage(_slack, slackEvent);
+
+        await  _handler.HandleNewGptRequest(slackEvent, context);
     }
 }
