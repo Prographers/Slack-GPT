@@ -65,7 +65,7 @@ public class GptClient
             return new GptResponse
             {
                 Message = result.FirstChoice,
-                Model = prompt.Model,
+                Model = result.Model,
                 Usage = result.Usage,
                 ProcessingTime = result.ProcessingTime
             };

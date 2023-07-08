@@ -3,12 +3,11 @@ using GptCore.Utilities;
 using SlackGptSocket.BotInfo;
 using SlackGptSocket.GptApi;
 using SlackGptSocket.Settings;
+using SlackGptSocket.SlackHandlers.Utilities;
 using SlackGptSocket.Utilities;
 using SlackNet;
-using SlackNet.Blocks;
 using SlackNet.Events;
 using SlackNet.Interaction;
-using SlackNet.WebApi;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace SlackGptSocket.SlackHandlers;
@@ -46,42 +45,44 @@ public class SlackMessageEventBaseHandler
     public async Task CommandHandler(SlashCommand slashCommand)
     {
         // Convert SlashCommand to MessageEventBase
-        var slackEvent = new AppMention()
+        var slackEvent = new AppMention
         {
             Channel = slashCommand.ChannelId,
             User = slashCommand.UserId,
             Text = slashCommand.Text,
             Team = slashCommand.TeamId,
             EventTs = slashCommand.TriggerId,
-            Ts = slashCommand.TriggerId,
+            Ts = slashCommand.TriggerId
         };
-        
+
         RemoveMentionsFromText(slackEvent);
-        
+
         var context = await ResolveConversationContext(slackEvent);
-        
+
         try
         {
             var text = await GeneratePrompt(slackEvent, context, slackEvent.User);
 
             if (HasError(text))
             {
-                await PostErrorEphemeralMessage("GptClient",slackEvent, text.Error);
+                await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "GptClient", slackEvent, text.Error);
                 return;
             }
 
-            await PostGptResponseMessage(slackEvent, text, true);
+            await SlackMessageFormat.PostGptResponseMessage(_slack, slackEvent, text, true);
         }
         catch (SlackException e)
         {
-            await PostErrorEphemeralMessage("SlackException" ,slackEvent, e.Message, string.Join("\n\t", e.ErrorMessages));
+            await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "SlackException", slackEvent, e.Message,
+                string.Join("\n\t", e.ErrorMessages));
         }
         catch (Exception e)
         {
-            await PostErrorEphemeralMessage("Unexpected", slackEvent, e.Message, e.StackTrace);
+            await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "Unexpected", slackEvent, e.Message,
+                e.StackTrace);
         }
     }
-    
+
     /// <summary>
     ///     Handles incoming MessageEventBase events and responds accordingly as if this is a message in bot's chat.
     /// </summary>
@@ -90,32 +91,34 @@ public class SlackMessageEventBaseHandler
     {
         if (IsBot(slackEvent)) return;
         if (!IsBotChannel(slackEvent) && _slackSettings.OnlyMentionsOutsideBotChannel) return;
-        
+
         RemoveMentionsFromText(slackEvent);
-        
+
         var context = await ResolveConversationContext(slackEvent);
-        
-        await PostLoadingMessage(slackEvent);
-        
+
+        await SlackMessageFormat.PostLoadingMessage(_slack, slackEvent);
+
         try
         {
             var text = await GeneratePrompt(slackEvent, context, slackEvent.User);
 
             if (HasError(text))
             {
-                await PostErrorEphemeralMessage("GptClient",slackEvent, text.Error);
+                await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "GptClient", slackEvent, text.Error);
                 return;
             }
 
-            await PostGptResponseMessage(slackEvent, text);
+            await SlackMessageFormat.PostGptResponseMessage(_slack, slackEvent, text);
         }
         catch (SlackException e)
         {
-            await PostErrorEphemeralMessage("SlackException" ,slackEvent, e.Message, string.Join("\n\t", e.ErrorMessages));
+            await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "SlackException", slackEvent, e.Message,
+                string.Join("\n\t", e.ErrorMessages));
         }
         catch (Exception e)
         {
-            await PostErrorEphemeralMessage("Unexpected", slackEvent, e.Message, e.StackTrace);
+            await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "Unexpected", slackEvent, e.Message,
+                e.StackTrace);
         }
     }
 
@@ -131,7 +134,7 @@ public class SlackMessageEventBaseHandler
 
         var context = await ResolveConversationContext(slackEvent);
 
-        await PostLoadingMessage(slackEvent);
+        await SlackMessageFormat.PostLoadingMessage(_slack, slackEvent);
 
         try
         {
@@ -139,19 +142,21 @@ public class SlackMessageEventBaseHandler
 
             if (HasError(text))
             {
-                await PostErrorEphemeralMessage("GptClient",slackEvent, text.Error);
+                await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "GptClient", slackEvent, text.Error);
                 return;
             }
 
-            await PostGptResponseMessage(slackEvent, text);
+            await SlackMessageFormat.PostGptResponseMessage(_slack, slackEvent, text);
         }
         catch (SlackException e)
         {
-            await PostErrorEphemeralMessage("SlackException" ,slackEvent, e.Message, string.Join("\n\t", e.ErrorMessages));
+            await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "SlackException", slackEvent, e.Message,
+                string.Join("\n\t", e.ErrorMessages));
         }
         catch (Exception e)
         {
-            await PostErrorEphemeralMessage("Unexpected", slackEvent, e.Message, e.StackTrace);
+            await SlackMessageFormat.PostErrorEphemeralMessage(_slack, "Unexpected", slackEvent, e.Message,
+                e.StackTrace);
         }
     }
 
@@ -164,7 +169,7 @@ public class SlackMessageEventBaseHandler
     {
         return slackEvent.User == _botInfo.BotInfo.UserId;
     }
-    
+
     /// <summary>
     ///     Checks if the event is triggered on the bot's channel.
     /// </summary>
@@ -203,12 +208,12 @@ public class SlackMessageEventBaseHandler
             var replies = await _slack.Conversations.Replies(slackEvent.Channel, slackEvent.ThreadTs, slackEvent.Ts);
             foreach (var reply in replies.Messages)
             {
-                if (IsBotReply(reply))
+                if (reply.IsBotReply(_botInfo))
                 {
                     var response = SlackParserUtils.RemoveContextBlockFromResponses(reply);
                     if (response != null) context.Add(new WritableChatPrompt("assistant", "__assistant__", response));
                 }
-                else if (IsUserReply(reply))
+                else if (reply.HasBotsMention(_botInfo))
                 {
                     if (slackEvent.Ts == reply.Ts)
                         continue;
@@ -225,84 +230,6 @@ public class SlackMessageEventBaseHandler
 
 
     /// <summary>
-    ///     Checks if the given message is a reply from the bot.
-    /// </summary>
-    /// <param name="reply">The message to check.</param>
-    /// <returns>True if the message is a bot reply, false otherwise.</returns>
-    private bool IsBotReply(MessageEvent reply)
-    {
-        return reply.User == _botInfo.BotInfo.UserId;
-    }
-
-    /// <summary>
-    ///     Checks if the given message is a reply from the user.
-    /// </summary>
-    /// <param name="reply">The message to check.</param>
-    /// <returns>True if the message is a user reply, false otherwise.</returns>
-    private bool IsUserReply(MessageEvent reply)
-    {
-        return reply.Text.Contains("<@" + _botInfo.BotInfo.UserId + ">");
-    }
-
-    /// <summary>
-    ///     Posts a loading message to the Slack channel.
-    /// </summary>
-    /// <param name="slackEvent">The MessageEventBase event.</param>
-    public async Task PostLoadingMessage(MessageEventBase slackEvent)
-    {
-        await _slack.Chat.PostEphemeral(slackEvent.User, new Message
-        {
-            Text = SlackLoadingMessage.GetRandomLoadingMessage(),
-            Channel = slackEvent.Channel,
-            ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts
-        });
-    }
-
-    /// <summary>
-    ///     Posts a ephemeral message to the Slack channel.
-    /// </summary>
-    /// <param name="slackEvent"></param>
-    /// <param name="text"></param>
-    public async Task PostEphemeralMessage(MessageEventBase slackEvent, string text)
-    {
-        await _slack.Chat.PostEphemeral(slackEvent.User, new Message
-        {
-            Text = text,
-            Channel = slackEvent.Channel,
-            ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts
-        });
-    }
-    
-    /// <summary>
-    ///     Posts a loading message to the Slack channel this ussualy shows when we are waiting for a long time.
-    /// </summary>
-    /// <param name="slackEvent"></param>
-    public async Task PostLongWaitMessage(MessageEventBase slackEvent)
-    {
-        await _slack.Chat.PostEphemeral(slackEvent.User, new Message
-        {
-            Text = SlackLoadingMessage.GetRandomLongWaitMessage(),
-            Channel = slackEvent.Channel,
-            ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts
-        });
-    }
-
-    /// <summary>
-    ///     Posts a loading message to the Slack channel this ussualy shows when we are waiting for a long time.
-    /// </summary>
-    /// <param name="slackEvent">Input slack event</param>
-    public async Task PostGptAvailableWarningMessage(MessageEventBase slackEvent)
-    {
-        await _slack.Chat.PostEphemeral(slackEvent.User, new Message
-        {
-            Text =
-                "OpenAI returned an error, that suggests high demand on servers. We will retry in your name a few times.",
-            Channel = slackEvent.Channel,
-            ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts
-        });
-    }
-
-    /// <summary>
     ///     Generates a prompt using the GPT client.
     /// </summary>
     /// <param name="slackEvent">Input slack event</param>
@@ -314,7 +241,7 @@ public class SlackMessageEventBaseHandler
     {
         // Start the periodic SendMessageProcessing task
         var cts = new CancellationTokenSource();
-        var periodicTask = PeriodicSendMessageProcessing(slackEvent, cts.Token);
+        var periodicTask = SlackMessageFormat.PeriodicSendMessageProcessing(_slack, slackEvent, cts.Token);
 
         var result = await GeneratePromptRetry(slackEvent, context, userId);
 
@@ -358,7 +285,7 @@ public class SlackMessageEventBaseHandler
 
             if (HasError(result) && result.Error!.Contains(repeatOnErrorsArray))
             {
-                if (errorsCount == 0) await PostGptAvailableWarningMessage(slackEvent);
+                if (errorsCount == 0) await SlackMessageFormat.PostGptAvailableWarningMessage(_slack, slackEvent);
                 errorsCount++;
                 if (errorsCount == 5) return result;
 
@@ -369,20 +296,6 @@ public class SlackMessageEventBaseHandler
         }
     }
 
-    /// <summary>
-    ///     Periodically calls SendMessageProcessing() every 100 seconds.
-    /// </summary>
-    /// <param name="cancellationToken"></param>
-    private async Task PeriodicSendMessageProcessing(MessageEventBase slackEvent, CancellationToken cancellationToken)
-    {
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(120), cancellationToken);
-            if (cancellationToken.IsCancellationRequested)
-                break;
-            await PostLongWaitMessage(slackEvent);
-        }
-    }
 
     /// <summary>
     ///     Checks if the given GPT response has an error.
@@ -392,102 +305,5 @@ public class SlackMessageEventBaseHandler
     private bool HasError(GptResponse text)
     {
         return text.Error != null;
-    }
-
-    /// <summary>
-    ///     Posts an error message to the Slack channel as an ephemeral message.
-    /// </summary>
-    /// <param name="slackEvent">The MessageEventBase event.</param>
-    /// <param name="errorMessage">The error message to post.</param>
-    /// <param name="details">Optional additional details about the error.</param>
-    private async Task PostErrorEphemeralMessage(string source, MessageEventBase slackEvent, string errorMessage,
-        string? details = null)
-    {
-        await _slack.Chat.PostEphemeral(slackEvent.User, new Message
-        {
-            Text =
-                $":rotating_light: [{source}] {errorMessage} :rotating_light: \n\t{(details != null ? $"\n\t{details}" : "")}",
-            Channel = slackEvent.Channel,
-            ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts
-        });
-    }
-
-    /// <summary>
-    ///     Posts the generated GPT response message to the Slack channel.
-    /// </summary>
-    /// <param name="slackEvent">The MessageEventBase event.</param>
-    /// <param name="text">The GPT response containing the message to post.</param>
-    /// <param name="asEphemeral">Whether to post the message as an ephemeral message.</param>
-    private async Task PostGptResponseMessage(MessageEventBase slackEvent, GptResponse text, bool asEphemeral = false)
-    {
-        // split the message into chunks of 2800 characters
-        if (text.Message.Length > 2800)
-        {
-            var chunks = text.Message.SplitInParts(2800);
-
-            for (var i = 0; i < chunks.Count; i++)
-            {
-                // post chunk message for all but last chunk
-                if (i < chunks.Count - 1)
-                    await PostSlackChunkMessage(slackEvent, chunks[i]);
-                else
-                {
-                    text.Message = chunks[i];
-                    if (asEphemeral)
-                        await PostEphemeralMessage(slackEvent, text.Message);
-                    else
-                        await PostSlackMessage(slackEvent, text);
-                }
-            }
-        }
-        else
-        {
-            if (asEphemeral)
-                await PostEphemeralMessage(slackEvent, text.Message);
-            else
-                await PostSlackMessage(slackEvent, text);
-        }
-    }
-
-    /// <summary>
-    ///     Posts a chunk of the GPT response message to the Slack channel.
-    /// </summary>
-    /// <param name="slackEvent">The MessageEventBase event.</param>
-    /// <param name="text">The chunk of the GPT response message to post.</param>
-    private async Task PostSlackChunkMessage(MessageEventBase slackEvent, string text)
-    {
-        await _slack.Chat.PostMessage(new Message
-        {
-            Blocks = SlackParserUtils.ConvertTextToBlocks(text),
-            Channel = slackEvent.Channel,
-            ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts
-        });
-    }
-
-    /// <summary>
-    ///     Posts the GPT response message to the Slack channel with additional context information.
-    /// </summary>
-    /// <param name="slackEvent">The MessageEventBase event.</param>
-    /// <param name="text">The GPT response containing the message and context information to post.</param>
-    private async Task PostSlackMessage(MessageEventBase slackEvent, GptResponse text)
-    {
-        var blocks = SlackParserUtils.ConvertTextToBlocks(text.Message);
-        blocks.Add(new ContextBlock
-        {
-            Elements = new[]
-            {
-                new Markdown($"by <@{slackEvent.User}> " +
-                             $"using {text.Model} " +
-                             $"in {text.ProcessingTime:hh':'mm':'ss} " +
-                             $"with {text.Usage?.TotalTokens.ToString() ?? "undefined"} tokens " +
-                             $"({Application.VersionString})")
-            }
-        });
-        await _slack.Chat.PostMessage(new Message
-        {
-            Channel = slackEvent.Channel,
-            ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts,
-            Blocks = blocks
-        });
     }
 }
