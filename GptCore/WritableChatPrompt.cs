@@ -1,6 +1,6 @@
 using OpenAI.Chat;
 
-namespace SlackGptSocket.GptApi;
+namespace GptCore;
 
 /// <summary>
 ///     Represents a writable chat prompt used for generating AI responses.

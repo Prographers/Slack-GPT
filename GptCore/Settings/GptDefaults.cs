@@ -1,4 +1,4 @@
-﻿namespace SlackGptSocket.Settings;
+﻿namespace GptCore.Settings;
 
 /// <summary>
 ///     Default values for the GPT API.

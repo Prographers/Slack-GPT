@@ -1,10 +1,10 @@
 ﻿using System.Text.RegularExpressions;
+using GptCore.Database;
+using GptCore.ParameterResolvers.Common;
+using GptCore.Settings;
 using OpenAI.Chat;
-using SlackGptSocket.GptApi.ParameterResolvers;
-using SlackGptSocket.Settings;
-using SlackGptSocket.Utilities.LiteDB;
 
-namespace SlackGptSocket.GptApi;
+namespace GptCore;
 
 /// <summary>
 ///     Represents a GPT client resolver. Provide list of chat prompts and a GPT request to parse to.

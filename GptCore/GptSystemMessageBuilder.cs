@@ -1,6 +1,6 @@
-﻿using SlackGptSocket.GptApi.ParameterResolvers;
+﻿using GptCore.ParameterResolvers.Common;
 
-namespace SlackGptSocket.GptApi;
+namespace GptCore;
 
 /// <summary>
 ///     Represents a system message builder

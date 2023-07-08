@@ -1,4 +1,4 @@
-﻿namespace SlackGptSocket.Settings;
+﻿namespace GptCore.Settings;
 
 /// <summary>
 ///     A custom command.

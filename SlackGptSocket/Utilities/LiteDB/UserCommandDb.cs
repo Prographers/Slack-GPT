@@ -1,4 +1,6 @@
-﻿using LiteDB;
+﻿using GptCore.Database;
+using GptCore.Settings;
+using LiteDB;
 using SlackGptSocket.Settings;
 
 namespace SlackGptSocket.Utilities.LiteDB;

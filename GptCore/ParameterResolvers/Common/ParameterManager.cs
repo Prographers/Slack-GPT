@@ -1,8 +1,8 @@
 ﻿using System.Collections;
-using SlackGptSocket.Settings;
-using SlackGptSocket.Utilities.LiteDB;
+using GptCore.Database;
+using GptCore.Settings;
 
-namespace SlackGptSocket.GptApi.ParameterResolvers;
+namespace GptCore.ParameterResolvers.Common;
 
 public class ParameterManager : IEnumerable<IParameterResolver>
 {

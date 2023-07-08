@@ -1,4 +1,6 @@
-﻿using OpenAI.Chat;
+﻿using GptCore;
+using GptCore.Settings;
+using OpenAI.Chat;
 using SlackGptSocket.GptApi;
 using SlackGptSocket.Settings;
 

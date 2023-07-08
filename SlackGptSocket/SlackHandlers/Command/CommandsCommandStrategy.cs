@@ -1,4 +1,6 @@
 ﻿using System.Text.RegularExpressions;
+using GptCore.Database;
+using GptCore.Settings;
 using SlackGptSocket.Settings;
 using SlackGptSocket.Utilities.LiteDB;
 using SlackNet.Interaction;

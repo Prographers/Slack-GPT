@@ -1,4 +1,5 @@
-﻿using GptCore.Utilities;
+﻿using GptCore;
+using GptCore.Utilities;
 using SlackGptSocket.BotInfo;
 using SlackGptSocket.GptApi;
 using SlackGptSocket.Settings;

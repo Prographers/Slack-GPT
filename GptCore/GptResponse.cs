@@ -1,6 +1,6 @@
 using OpenAI;
 
-namespace SlackGptSocket.GptApi;
+namespace GptCore;
 
 /// <summary>
 ///     Represents a response from the ChatGPT API.

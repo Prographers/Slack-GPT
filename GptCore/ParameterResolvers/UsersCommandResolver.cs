@@ -1,8 +1,9 @@
 ﻿using System.Text;
-using SlackGptSocket.Settings;
-using SlackGptSocket.Utilities.LiteDB;
+using GptCore.Database;
+using GptCore.ParameterResolvers.Common;
+using GptCore.Settings;
 
-namespace SlackGptSocket.GptApi.ParameterResolvers;
+namespace GptCore.ParameterResolvers;
 
 /// <summary>
 ///     Represents a parameter resolver for user-defined commands.

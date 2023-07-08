@@ -1,7 +1,8 @@
 ﻿using System.Text;
-using SlackGptSocket.Settings;
+using GptCore.ParameterResolvers.Common;
+using GptCore.Settings;
 
-namespace SlackGptSocket.GptApi.ParameterResolvers;
+namespace GptCore.ParameterResolvers;
 
 /// <summary>
 ///     Represents a parameter resolver for the context parameter.

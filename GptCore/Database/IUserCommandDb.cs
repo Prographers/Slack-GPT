@@ -1,6 +1,6 @@
-﻿using SlackGptSocket.Settings;
+﻿using GptCore.Settings;
 
-namespace SlackGptSocket.Utilities.LiteDB;
+namespace GptCore.Database;
 
 /// <summary>
 ///     A database for user-defined commands.

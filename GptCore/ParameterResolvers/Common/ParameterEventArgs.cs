@@ -1,4 +1,4 @@
-namespace SlackGptSocket.GptApi.ParameterResolvers;
+namespace GptCore.ParameterResolvers.Common;
 
 /// <summary>
 ///     Arguments of a parameter resolver.

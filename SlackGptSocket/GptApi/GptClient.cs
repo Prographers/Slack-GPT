@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Options;
+﻿using GptCore;
+using GptCore.Database;
+using GptCore.Settings;
+using Microsoft.Extensions.Options;
 using OpenAI;
 using SlackGptSocket.Settings;
 using SlackGptSocket.Utilities.LiteDB;

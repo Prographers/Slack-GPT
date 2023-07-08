@@ -1,3 +1,6 @@
+using GptCore;
+using GptCore.Database;
+using GptCore.Settings;
 using LiteDB;
 using SlackGptSocket.BotInfo;
 using SlackGptSocket.GptApi;

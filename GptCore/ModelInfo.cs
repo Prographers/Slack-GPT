@@ -1,4 +1,4 @@
-namespace SlackGptSocket.GptApi;
+namespace GptCore;
 
 /// <summary>
 ///     Represents information about a specific AI model.

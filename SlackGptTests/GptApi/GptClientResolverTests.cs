@@ -1,4 +1,6 @@
 using FluentAssertions;
+using GptCore;
+using GptCore.Settings;
 using LiteDB;
 using OpenAI.Chat;
 using SlackGptSocket.GptApi;

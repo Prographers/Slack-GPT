@@ -1,8 +1,9 @@
 using System.Globalization;
+using GptCore.ParameterResolvers.Common;
+using GptCore.Settings;
 using GptCore.Utilities;
-using SlackGptSocket.Settings;
 
-namespace SlackGptSocket.GptApi.ParameterResolvers;
+namespace GptCore.ParameterResolvers;
 
 /// <summary>
 ///     Represents a parameter resolver for the top-p parameter.

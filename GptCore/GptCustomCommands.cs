@@ -1,6 +1,6 @@
-﻿using SlackGptSocket.Settings;
+﻿using GptCore.Settings;
 
-namespace SlackGptSocket.GptApi;
+namespace GptCore;
 
 /// <summary>
 ///     Custom pre-defined commands for the bot. These are defined in the appsettings.json file.
