@@ -31,7 +31,7 @@ Did you like this tool? Give us a visit :) [https://prographers.com/](https://pr
 
 1. Go to [OpenAI Dashboard](https://platform.openai.com/account/api-keys)
 2. Click on "Create new secret key" button.
-3. Copy the secret and put it into the `OpenAIKey` variable in `appsettings.json`.
+3. Copy the secret and put it into the `OpenAIKey` variable in [`appsettings.json`](https://github.com/Prographers/Slack-GPT/blob/main/Slack-GPT-Socket/appsettings.Example.json).
 
 NOTE: Using the OpenAI API requires a paid/trial account. You can find more information about pricing [here](https://openai.com/pricing/).
 
@@ -78,7 +78,7 @@ You can start your message with the name of the model without parameters eg:
 Will use gpt-3.5-turbo instead of the default gpt-4 model. See GptClient for more aliases.
 
 ### Built-in Parameters
-There are some built in parameters. Use `/gpt help` to see them. You can modify the parameters in `appsettings.json` file,
+There are some built in parameters. Use `/gpt help` to see them. You can modify the parameters in  [`appsettings.json`](https://github.com/Prographers/Slack-GPT/blob/main/Slack-GPT-Socket/appsettings.Example.json) file,
 or per request.
 
 See GptDefaults.cs for more information about the defaults or `appsettings.Example.json`.
@@ -88,7 +88,7 @@ See GptDefaults.cs for more information about the defaults or `appsettings.Examp
 **Predefined commands**
 
 You can add you own custom parameters to the bot to minimize the typing for each repated request. To do so, add the it's definition
-to the `GptCommands` section in `appsettings.json`. For example:
+to the `GptCommands` section in [`appsettings.json`](https://github.com/Prographers/Slack-GPT/blob/main/Slack-GPT-Socket/appsettings.Example.json). For example:
 
 ```json
  "GptCommands": {
@@ -137,7 +137,7 @@ the image from the GitHub Container Registry, and start the container when that 
 docker-compose up -d
 ```
 
-Please remember to put the appsettings.json file in the same directory as the command for both cases.
+Please remember to put the [`appsettings.json`](https://github.com/Prographers/Slack-GPT/blob/main/Slack-GPT-Socket/appsettings.Example.json) file in the same directory as the command for both cases.
 
 ### Security
 
