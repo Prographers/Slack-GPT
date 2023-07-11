@@ -19,7 +19,7 @@ public class GptClientEdgeCasesTests
         _gptDefaults = new GptDefaults();
         _customCommands = new GptCustomCommands(new GptCommands());
         var userCommandDb = new UserCommandDb(new LiteDatabase("Filename=:memory:;Mode=Memory;Cache=Shared"));
-        _resolver = new GptClientResolver(_customCommands, _gptDefaults, userCommandDb);
+        _resolver = new GptClientResolver(_customCommands, _gptDefaults, userCommandDb, null!, null!);
     }
 
     private GptDefaults _gptDefaults;

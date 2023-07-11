@@ -24,7 +24,7 @@ public class GptClientUserCommandsTests
         _gptDefaults = new GptDefaults();
         _customCommands = new GptCustomCommands(new GptCommands());
         _userCommandDb = new UserCommandDb(new LiteDatabase("Filename=:memory:;Mode=Memory;Cache=Shared"));
-        _resolver = new GptClientResolver(_customCommands, _gptDefaults, _userCommandDb);
+        _resolver = new GptClientResolver(_customCommands, _gptDefaults, _userCommandDb, null!, null!);
     }
     
     [Test]
