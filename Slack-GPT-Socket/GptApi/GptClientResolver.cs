@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using OpenAI;
 using OpenAI.Chat;
 using Slack_GPT_Socket.GptApi.ParameterResolvers;
 using Slack_GPT_Socket.Settings;
@@ -31,9 +32,8 @@ public class GptClientResolver
     /// <param name="chatPrompts">The list of chat prompts.</param>
     /// <param name="request">The GPT request.</param>
     /// <returns>A ChatRequest instance.</returns>
-    public ChatRequest ParseRequest(List<WritableChatPrompt> chatPrompts, GptRequest request)
+    public (IEnumerable<ChatMessage> Messages, ChatCompletionOptions Options, string Model) ParseRequest(List<WritableMessage> chatPrompts, GptRequest request)
     {
-        GptSystemMessageBuilder? contextMessage = null;
         foreach (var chatPrompt in chatPrompts)
         {
             var content = GptRequest.Default(_gptDefaults);
@@ -42,43 +42,47 @@ public class GptClientResolver
             ResolveModel(ref content);
             ResolveParameters(ref content);
             chatPrompt.Content = content.Prompt;
-
-            // TODO Refactor this into a separate resolver.
-            if (content.System.IsContextMessage == ContextMessageStatus.Set) contextMessage = content.System;
-            else if (content.System.IsContextMessage == ContextMessageStatus.Cleared) contextMessage = null;
+            
         }
 
         ResolveModel(ref request);
         ResolveParameters(ref request);
-
-        if (contextMessage != null && !request.System.IsModified)
-            request.System = contextMessage;
-
-        WritableChatPrompt system;
-        if (request.System.ShouldReplace)
-            system = new WritableChatPrompt("system", "__system__", request.System.Build());
-        else
-        {
-            system = new WritableChatPrompt("system", "__system__",
-                $"You are a helpful assistant. Today is {DateTime.Now:yyyy-MM-ddTHH:mm:ssZ} " + request.System.Build());
-        }
-
-        var requestPrompts = new List<WritableChatPrompt>();
-        requestPrompts.Add(system);
+        
+        var requestPrompts = new List<WritableMessage>();
         requestPrompts.AddRange(chatPrompts);
 
-        var chatRequest = new ChatRequest(
-            requestPrompts.Select(p => new ChatPrompt(p.Role, p.Content)).ToList(),
-            maxTokens: request.MaxTokens,
-            temperature: request.Temperature,
-            topP: request.TopP,
-            presencePenalty: request.PresencePenalty,
-            frequencyPenalty: request.FrequencyPenalty,
-            model: request.Model,
-            user: request.UserId
-        );
+        var messages = new List<ChatMessage>();
+        var options = new ChatCompletionOptions
+        {
+            MaxOutputTokenCount = request.MaxTokens,
+            Temperature = request.Temperature,
+            TopP = request.TopP,
+            PresencePenalty = request.PresencePenalty,
+            FrequencyPenalty = request.FrequencyPenalty,
+            EndUserId = request.UserId,
+        };
+        foreach (var chatPrompt in chatPrompts)
+        {
+            switch (chatPrompt.Role)
+            {
+                case Role.User:
+                    messages.Add(new UserChatMessage(chatPrompt.Content));
+                    break;
+                case Role.Assistant:
+                    messages.Add(new AssistantChatMessage(chatPrompt.Content));
+                    break;
+                case Role.System:
+                    messages.Add(new SystemChatMessage(chatPrompt.Content));
+                    break;
+                case Role.Tool:
+                    messages.Add(new ToolChatMessage(chatPrompt.Content));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
 
-        return chatRequest;
+        return (messages, options, request.Model);
     }
 
     /// <summary>
@@ -107,7 +111,7 @@ public class GptClientResolver
             }
         }
 
-        if (modelFound) return;
+        if (!modelFound) return;
 
         var inputModel = input.Model;
         // check if current model is valid

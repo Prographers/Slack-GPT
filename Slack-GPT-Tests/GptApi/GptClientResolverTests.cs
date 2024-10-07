@@ -1,5 +1,6 @@
 using FluentAssertions;
 using LiteDB;
+using OpenAI;
 using OpenAI.Chat;
 using Slack_GPT_Socket.GptApi;
 using Slack_GPT_Socket.Settings;
@@ -43,9 +44,9 @@ public class GptClientResolverTests
         chatRequest.Should().NotBeNull();
         var messages = chatRequest.Messages.ToList();
         messages.Should().HaveCount(2);
-        messages[0].Role.Should().Be("system");
+        messages[0].Role.Should().Be(Role.System);
         messages[0].Content.Should().StartWith("You are a helpful assistant.");
-        messages[1].Should().BeEquivalentTo(new ChatPrompt("user", "How's the weather?"));
+        messages[1].Should().BeEquivalentTo(new Message(Role.User, "How's the weather?"));
     }
 
     [Test]

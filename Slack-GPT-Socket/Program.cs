@@ -16,8 +16,24 @@ builder.Services.Configure<SlackSettings>(builder.Configuration.GetSection("Slac
 
 builder.Services.AddSingleton<GptClient>();
 builder.Services.AddSingleton<GptCustomCommands>();
-builder.Services.AddSingleton<ILiteDatabase>(x => 
-    new LiteDatabase(builder.Configuration.GetConnectionString("LiteDB") ?? "Filename=:memory:;Mode=Memory;Cache=Shared")
+builder.Services.AddSingleton<ILiteDatabase>(x =>
+    {
+        var connectionStringRaw = builder.Configuration.GetConnectionString("LiteDB") ??
+                               "Filename=:memory:;Mode=Memory;Cache=Shared";
+
+        var connectionString = new ConnectionString(connectionStringRaw);
+        if (connectionString.Filename != ":memory:")
+        {
+            var directory = Path.GetDirectoryName(connectionString.Filename);
+            if (!string.IsNullOrEmpty(directory))
+            {
+               Directory.CreateDirectory(directory);
+            }
+        }
+        
+        var db = new LiteDatabase(connectionString);
+        return db;
+    }
 );
 
 builder.Services.AddSingleton<IUserCommandDb, UserCommandDb>();

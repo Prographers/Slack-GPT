@@ -26,7 +26,7 @@ public class MaxTokenResolver : IParameterResolver
     public string BuildShortHelpText(GptDefaults gptDefaults, string userId)
     {
         return
-            $"{Name}: limits tokens in output, default {gptDefaults.MaxTokens?.ToString() ?? "4000"} (GPT-3.5: 4000, GPT-4: 8000)";
+            $"{Name}: limits tokens in output, default {gptDefaults.MaxTokens?.ToString() ?? "4000"} (refer to https://openai.com/api/pricing/ for more information)";
     }
 
     /// <inheritdoc />
@@ -34,7 +34,7 @@ public class MaxTokenResolver : IParameterResolver
     {
         var names = string.Join("\n", Names);
         return
-            $"{names}\n\t: limits tokens in output, default {gptDefaults.MaxTokens?.ToString() ?? "4000"} (GPT-3.5: 4000, GPT-4: 8000)\n";
+            $"{names}\n\t: limits tokens in output, default {gptDefaults.MaxTokens?.ToString() ?? "4000"} (refer to https://openai.com/api/pricing/ for more information)\n";
     }
 
     /// <inheritdoc />

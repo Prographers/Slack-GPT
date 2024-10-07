@@ -1,4 +1,5 @@
-﻿using OpenAI.Chat;
+﻿using OpenAI;
+using OpenAI.Chat;
 using Slack_GPT_Socket;
 using Slack_GPT_Socket.GptApi;
 using Slack_GPT_Socket.Settings;
@@ -14,18 +15,18 @@ public static class GptClientResolverTestsUtils
     /// <param name="userId"></param>
     /// <param name="prompts"></param>
     /// <returns></returns>
-    public static ChatRequest TestParseRequest(this GptClientResolver resolver, string? userId,
+    public static (IEnumerable<ChatMessage> Messages, ChatCompletionOptions Options, string Model) TestParseRequest(this GptClientResolver resolver, string? userId,
         params (string user, string prompt)[] prompts)
     {
         var gptRequest = GptRequest.Default(new GptDefaults());
-        var chatPrompts = new List<WritableChatPrompt>();
+        var chatPrompts = new List<WritableMessage>();
         foreach (var (user, prompt) in prompts)
         {
-            chatPrompts.Add(new WritableChatPrompt(user, userId, prompt));
+            chatPrompts.Add(new WritableMessage(Role.User, userId, prompt));
         }
 
         gptRequest.UserId = userId;
-        gptRequest.Prompt = chatPrompts.Last(chatPrompt => chatPrompt.Role == "user").Content;
+        gptRequest.Prompt = chatPrompts.Last(chatPrompt => chatPrompt.Role == Role.User).Content;
         return resolver.ParseRequest(chatPrompts, gptRequest);
     }
     
@@ -36,7 +37,7 @@ public static class GptClientResolverTestsUtils
     /// <param name="resolver"></param>
     /// <param name="prompts"></param>
     /// <returns></returns>
-    public static ChatRequest TestParseRequest(this GptClientResolver resolver,
+    public static (IEnumerable<ChatMessage> Messages, ChatCompletionOptions Options, string Model) TestParseRequest(this GptClientResolver resolver,
         params (string user, string prompt)[] prompts)
     {
         return TestParseRequest(resolver, "U123ID", prompts);

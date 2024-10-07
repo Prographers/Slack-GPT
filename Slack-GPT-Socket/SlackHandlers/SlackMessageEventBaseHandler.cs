@@ -42,27 +42,27 @@ public class SlackMessageEventBaseHandler
     public async Task CommandHandler(SlashCommand slashCommand)
     {
         // Convert SlashCommand to MessageEventBase
-        var slackEvent = new AppMention()
+        var slackEvent = new AppMention
         {
             Channel = slashCommand.ChannelId,
             User = slashCommand.UserId,
             Text = slashCommand.Text,
             Team = slashCommand.TeamId,
             EventTs = slashCommand.TriggerId,
-            Ts = slashCommand.TriggerId,
+            Ts = slashCommand.TriggerId
         };
-        
+
         RemoveMentionsFromText(slackEvent);
-        
+
         var context = await ResolveConversationContext(slackEvent);
-        
+
         try
         {
             var text = await GeneratePrompt(slackEvent, context, slackEvent.User);
 
             if (HasError(text))
             {
-                await PostErrorEphemeralMessage("GptClient",slackEvent, text.Error);
+                await PostErrorEphemeralMessage("GptClient", slackEvent, text.Error);
                 return;
             }
 
@@ -70,14 +70,15 @@ public class SlackMessageEventBaseHandler
         }
         catch (SlackException e)
         {
-            await PostErrorEphemeralMessage("SlackException" ,slackEvent, e.Message, string.Join("\n\t", e.ErrorMessages));
+            await PostErrorEphemeralMessage("SlackException", slackEvent, e.Message,
+                string.Join("\n\t", e.ErrorMessages));
         }
         catch (Exception e)
         {
             await PostErrorEphemeralMessage("Unexpected", slackEvent, e.Message, e.StackTrace);
         }
     }
-    
+
     /// <summary>
     ///     Handles incoming MessageEventBase events and responds accordingly as if this is a message in bot's chat.
     /// </summary>
@@ -86,20 +87,20 @@ public class SlackMessageEventBaseHandler
     {
         if (IsBot(slackEvent)) return;
         if (!IsBotChannel(slackEvent) && _slackSettings.OnlyMentionsOutsideBotChannel) return;
-        
+
         RemoveMentionsFromText(slackEvent);
-        
+
         var context = await ResolveConversationContext(slackEvent);
-        
+
         await PostLoadingMessage(slackEvent);
-        
+
         try
         {
             var text = await GeneratePrompt(slackEvent, context, slackEvent.User);
 
             if (HasError(text))
             {
-                await PostErrorEphemeralMessage("GptClient",slackEvent, text.Error);
+                await PostErrorEphemeralMessage("GptClient", slackEvent, text.Error);
                 return;
             }
 
@@ -107,7 +108,8 @@ public class SlackMessageEventBaseHandler
         }
         catch (SlackException e)
         {
-            await PostErrorEphemeralMessage("SlackException" ,slackEvent, e.Message, string.Join("\n\t", e.ErrorMessages));
+            await PostErrorEphemeralMessage("SlackException", slackEvent, e.Message,
+                string.Join("\n\t", e.ErrorMessages));
         }
         catch (Exception e)
         {
@@ -135,7 +137,7 @@ public class SlackMessageEventBaseHandler
 
             if (HasError(text))
             {
-                await PostErrorEphemeralMessage("GptClient",slackEvent, text.Error);
+                await PostErrorEphemeralMessage("GptClient", slackEvent, text.Error);
                 return;
             }
 
@@ -143,7 +145,8 @@ public class SlackMessageEventBaseHandler
         }
         catch (SlackException e)
         {
-            await PostErrorEphemeralMessage("SlackException" ,slackEvent, e.Message, string.Join("\n\t", e.ErrorMessages));
+            await PostErrorEphemeralMessage("SlackException", slackEvent, e.Message,
+                string.Join("\n\t", e.ErrorMessages));
         }
         catch (Exception e)
         {
@@ -160,7 +163,7 @@ public class SlackMessageEventBaseHandler
     {
         return slackEvent.User == _botInfo.BotInfo.UserId;
     }
-    
+
     /// <summary>
     ///     Checks if the event is triggered on the bot's channel.
     /// </summary>
@@ -189,10 +192,10 @@ public class SlackMessageEventBaseHandler
     ///     Resolves the conversation context for the given Slack event.
     /// </summary>
     /// <param name="slackEvent">The MessageEventBase event.</param>
-    /// <returns>A list of WritableChatPrompt instances representing the conversation context.</returns>
-    public async Task<List<WritableChatPrompt>> ResolveConversationContext(MessageEventBase slackEvent)
+    /// <returns>A list of WritableMessage instances representing the conversation context.</returns>
+    public async Task<List<WritableMessage>> ResolveConversationContext(MessageEventBase slackEvent)
     {
-        var context = new List<WritableChatPrompt>();
+        var context = new List<WritableMessage>();
 
         if (slackEvent.ThreadTs != null)
         {
@@ -202,19 +205,19 @@ public class SlackMessageEventBaseHandler
                 if (IsBotReply(reply))
                 {
                     var response = SlackParserUtils.RemoveContextBlockFromResponses(reply);
-                    if (response != null) context.Add(new WritableChatPrompt("assistant", "__assistant__", response));
+                    if (response != null) context.Add(new WritableMessage(Role.Assistant, "__assistant__", response));
                 }
                 else if (IsUserReply(reply))
                 {
                     if (slackEvent.Ts == reply.Ts)
                         continue;
                     var response = reply.Text.Replace("<@" + _botInfo.BotInfo.UserId + ">", "").Trim();
-                    context.Add(new WritableChatPrompt("user", reply.User, response));
+                    context.Add(new WritableMessage(Role.User, reply.User, response));
                 }
             }
         }
 
-        context.Add(new WritableChatPrompt("user", slackEvent.User, slackEvent.Text));
+        context.Add(new WritableMessage(Role.User, slackEvent.User, slackEvent.Text));
 
         return context;
     }
@@ -268,7 +271,7 @@ public class SlackMessageEventBaseHandler
             ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts
         });
     }
-    
+
     /// <summary>
     ///     Posts a loading message to the Slack channel this ussualy shows when we are waiting for a long time.
     /// </summary>
@@ -305,7 +308,7 @@ public class SlackMessageEventBaseHandler
     /// <param name="context">The chat context to be used in generating the prompt.</param>
     /// <param name="userId">The user ID to be used in generating the prompt.</param>
     /// <returns>A GPTResponse instance containing the generated prompt.</returns>
-    private async Task<GptResponse> GeneratePrompt(MessageEventBase slackEvent, List<WritableChatPrompt> context,
+    private async Task<GptResponse> GeneratePrompt(MessageEventBase slackEvent, List<WritableMessage> context,
         string userId)
     {
         // Start the periodic SendMessageProcessing task
@@ -337,7 +340,7 @@ public class SlackMessageEventBaseHandler
     /// <param name="context">The chat context to be used in generating the prompt.</param>
     /// <param name="userId">The user ID to be used in generating the prompt.</param>
     /// <returns>A GPTResponse instance containing the generated prompt.</returns>
-    private async Task<GptResponse> GeneratePromptRetry(MessageEventBase slackEvent, List<WritableChatPrompt> context,
+    private async Task<GptResponse> GeneratePromptRetry(MessageEventBase slackEvent, List<WritableMessage> context,
         string userId)
     {
         var errorsCount = 0;
@@ -475,7 +478,7 @@ public class SlackMessageEventBaseHandler
                 new Markdown($"by <@{slackEvent.User}> " +
                              $"using {text.Model} " +
                              $"in {text.ProcessingTime:hh':'mm':'ss} " +
-                             $"with {text.Usage?.TotalTokens.ToString() ?? "undefined"} tokens " +
+                             $"with {text.Usage?.TotalTokenCount} ({text.Usage?.InputTokenCount}/{text.Usage?.OutputTokenCount}) tokens " +
                              $"({Application.VersionString})")
             }
         });

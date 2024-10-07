@@ -1,4 +1,5 @@
 using OpenAI;
+using OpenAI.Chat;
 
 namespace Slack_GPT_Socket.GptApi;
 
@@ -25,7 +26,7 @@ public class GptResponse
     /// <summary>
     ///     Gets or sets the usage information (optional).
     /// </summary>
-    public Usage? Usage { get; set; }
+    public ChatTokenUsage? Usage { get; set; }
 
     /// <summary>
     ///     Gets or sets the processing time of the response (optional).

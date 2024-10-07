@@ -5,3 +5,7 @@ riderModule.iml
 /_ReSharper.Caches/
 /Slack-GPT-Socket/app-log.db
 /Slack-GPT-Socket/app.db
+
+*appsettings.json
+*appsettings.Development.json
+/Slack-GPT-Socket/db/*

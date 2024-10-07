@@ -50,35 +50,36 @@ public class GptRequest
     /// <summary>
     ///     Gets or sets the maximum number of tokens in the generated response.
     /// </summary>
-    public int MaxTokens { get; set; } = 4000;
+    public int? MaxTokens { get; set; }
 
     /// <summary>
     ///     Gets or sets the temperature for randomness in the response.
     /// </summary>
-    public float Temperature { get; set; } = 0.7f;
+    public float? Temperature { get; set; }
 
     /// <summary>
     ///     Gets or sets the Top-P sampling value for the response.
     /// </summary>
-    public float TopP { get; set; } = 1f;
+    public float? TopP { get; set; }
 
     /// <summary>
     ///     Gets or sets the presence penalty for the generated response.
     /// </summary>
-    public float PresencePenalty { get; set; } = 0f;
+    public float? PresencePenalty { get; set; }
 
     /// <summary>
     ///     Gets or sets the frequency penalty for the generated response.
     /// </summary>
-    public float FrequencyPenalty { get; set; } = 0f;
+    public float? FrequencyPenalty { get; set; }
 
     /// <summary>
     ///     Gets or sets the model used for generating the response.
     /// </summary>
-    public string Model { get; set; } = "gpt-4";
+    public string Model { get; set; } = "gpt-4o";
 
     /// <summary>
     ///     Gets or sets the system identifier (optional).
     /// </summary>
     public GptSystemMessageBuilder System { get; set; } = new();
+    
 }

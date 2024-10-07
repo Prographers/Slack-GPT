@@ -13,7 +13,12 @@ public class ParameterManager : IEnumerable<IParameterResolver>
     /// </summary>
     private ModelInfo[] _models = new ModelInfo[]
     {
+        new("o1-preview", "o1"),
+        new("o1-mini", "o1-mini"),
+        new("gpt-4o", "gpt4o"),
         new("gpt-4", "gpt4"),
+        new("gpt-4o-mini", "gpt4o-mini"),
+        new("gpt-4-turbo", "gpt4-turbo"),
         new("gpt-3.5-turbo", "chatgpt", "gpt-3", "gpt3", "turbo")
     };
 

@@ -65,7 +65,7 @@ public class ModelResolver : IParameterResolver
             return;
         }
 
-        // if no model was found, set args as has value to false
-        args.HasValue = false;
+        // because we can own a model that is not hardcoded, use input value at face value
+        input.Model = testValue;
     }
 }
