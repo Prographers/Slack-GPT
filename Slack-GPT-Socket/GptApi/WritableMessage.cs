@@ -1,4 +1,5 @@
 using OpenAI;
+using OpenAI.Chat;
 
 namespace Slack_GPT_Socket.GptApi;
 
@@ -42,4 +43,31 @@ public sealed class WritableMessage
     ///     Gets or sets the content of the chat prompt.
     /// </summary>
     public string Content { get; set; }
+    
+    /// <summary>
+    ///     Gets or sets the files attached to the chat prompt.
+    /// </summary>
+    public List<ChatMessageContentPart> Files { get; set; }
+    
+    public ChatMessage ToChatMessage()
+    {
+        var textContent = ChatMessageContentPart.CreateTextPart(Content);
+        var fileContent = Files ?? [];
+        var content = new List<ChatMessageContentPart> {textContent};
+        content.AddRange(fileContent);
+        
+        switch (Role)
+        {
+            case Role.User:
+                return new UserChatMessage(content);
+            case Role.Assistant:
+                return new AssistantChatMessage(content);
+            case Role.System:
+                return new SystemChatMessage(content);
+            case Role.Tool:
+                return new ToolChatMessage(Content);
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
 }

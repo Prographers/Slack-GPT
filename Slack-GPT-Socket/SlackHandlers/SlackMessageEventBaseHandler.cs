@@ -307,30 +307,39 @@ public class SlackMessageEventBaseHandler
     /// <param name="slackEvent">Input slack event</param>
     /// <param name="context">The chat context to be used in generating the prompt.</param>
     /// <param name="userId">The user ID to be used in generating the prompt.</param>
+    /// <param name="files">Files attached with the prompt</param>
     /// <returns>A GPTResponse instance containing the generated prompt.</returns>
     private async Task<GptResponse> GeneratePrompt(MessageEventBase slackEvent, List<WritableMessage> context,
         string userId)
     {
-        // Start the periodic SendMessageProcessing task
         var cts = new CancellationTokenSource();
-        var periodicTask = PeriodicSendMessageProcessing(slackEvent, cts.Token);
-
-        var result = await GeneratePromptRetry(slackEvent, context, userId);
-
-        // Cancel the periodic task once the long running method returns
-        cts.Cancel();
-
-        // Ensure the periodic task has completed before proceeding
         try
         {
-            await periodicTask;
+            // Start the periodic SendMessageProcessing task
+            var periodicTask = PeriodicSendMessageProcessing(slackEvent, cts.Token);
+
+            var result = await GeneratePromptRetry(slackEvent, context, userId);
+
+            await cts.CancelAsync();
+            
+            // Ensure the periodic task has completed before proceeding
+            try
+            {
+                await periodicTask;
+            }
+            catch (TaskCanceledException)
+            {
+                // Ignore CTS CancelledException
+            }
+            
+            return result;
         }
-        catch (TaskCanceledException)
+        finally
         {
-            // Ignore CTS CancelledException
+            if(!cts.Token.IsCancellationRequested)
+                await cts.CancelAsync();
         }
 
-        return result;
     }
 
     /// <summary>
@@ -346,7 +355,7 @@ public class SlackMessageEventBaseHandler
         var errorsCount = 0;
         while (true)
         {
-            var result = await _gptClient.GeneratePrompt(context, userId);
+            var result = await _gptClient.GeneratePrompt(slackEvent, context, userId);
 
             var repeatOnErrorsArray = new[]
             {

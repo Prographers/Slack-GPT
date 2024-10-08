@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using OpenAI;
 using OpenAI.Chat;
 using Slack_GPT_Socket.GptApi.ParameterResolvers;
 using Slack_GPT_Socket.Settings;
@@ -31,8 +30,10 @@ public class GptClientResolver
     /// </summary>
     /// <param name="chatPrompts">The list of chat prompts.</param>
     /// <param name="request">The GPT request.</param>
+    /// <param name="files">List of files attached to this prompt</param>
     /// <returns>A ChatRequest instance.</returns>
-    public (IEnumerable<ChatMessage> Messages, ChatCompletionOptions Options, string Model) ParseRequest(List<WritableMessage> chatPrompts, GptRequest request)
+    public (IEnumerable<ChatMessage> Messages, ChatCompletionOptions Options, string Model) ParseRequest(
+        List<WritableMessage> chatPrompts, GptRequest request, List<ChatMessageContentPart>? files = null)
     {
         foreach (var chatPrompt in chatPrompts)
         {
@@ -42,12 +43,11 @@ public class GptClientResolver
             ResolveModel(ref content);
             ResolveParameters(ref content);
             chatPrompt.Content = content.Prompt;
-            
         }
 
         ResolveModel(ref request);
         ResolveParameters(ref request);
-        
+
         var requestPrompts = new List<WritableMessage>();
         requestPrompts.AddRange(chatPrompts);
 
@@ -59,27 +59,13 @@ public class GptClientResolver
             TopP = request.TopP,
             PresencePenalty = request.PresencePenalty,
             FrequencyPenalty = request.FrequencyPenalty,
-            EndUserId = request.UserId,
+            EndUserId = request.UserId
         };
+        chatPrompts.Last().Files = files ?? [];
+        
         foreach (var chatPrompt in chatPrompts)
         {
-            switch (chatPrompt.Role)
-            {
-                case Role.User:
-                    messages.Add(new UserChatMessage(chatPrompt.Content));
-                    break;
-                case Role.Assistant:
-                    messages.Add(new AssistantChatMessage(chatPrompt.Content));
-                    break;
-                case Role.System:
-                    messages.Add(new SystemChatMessage(chatPrompt.Content));
-                    break;
-                case Role.Tool:
-                    messages.Add(new ToolChatMessage(chatPrompt.Content));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            messages.Add(chatPrompt.ToChatMessage());
         }
 
         return (messages, options, request.Model);
@@ -130,10 +116,10 @@ public class GptClientResolver
     private void ResolveParameters(ref GptRequest input)
     {
         var lastIndex = 0;
-        Match match = ParameterRegex.Match(input.Prompt);
-        
-        if(!match.Success) return;
-        
+        var match = ParameterRegex.Match(input.Prompt);
+
+        if (!match.Success) return;
+
         do
         {
             var paramName = match.Groups[1].Value;
@@ -190,16 +176,15 @@ public class GptClientResolver
         if (args.HasValue)
         {
             // Find last index of this value args.ValueRaw
-            var paramValueIndex = input.Prompt.IndexOf(args.ValueRaw, StringComparison.InvariantCultureIgnoreCase) + args.ValueRaw.Length + 1;
+            var paramValueIndex = input.Prompt.IndexOf(args.ValueRaw, StringComparison.InvariantCultureIgnoreCase) +
+                                  args.ValueRaw.Length + 1;
             lastIndex = paramValueIndex;
             input.Prompt = input.Prompt.Substring(paramValueIndex, input.Prompt.Length - paramValueIndex).Trim();
             return;
         }
-        else
-        {
-            lastIndex = paramNameIndex + args.Name.Length + 2;
-            searchString = args.Name + " ";
-            input.Prompt = input.Prompt.Replace(searchString, "").Trim();
-        }
+
+        lastIndex = paramNameIndex + args.Name.Length + 2;
+        searchString = args.Name + " ";
+        input.Prompt = input.Prompt.Replace(searchString, "").Trim();
     }
 }
