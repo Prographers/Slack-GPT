@@ -21,11 +21,14 @@ Did you like this tool? Give us a visit :) [https://prographers.com/](https://pr
 
 ## Dependencies
 
-- .NET 7.0
-- OpenAI-DotNet
+- .NET 8.0
+- OpenAI
 - SlackNet
 - SlackNet.AspNetCore
 - Octokit.Net
+- Newtonsoft.NET
+- Humanizer
+- LiteDB
 
 ## Getting OpenAI Api Key
 
