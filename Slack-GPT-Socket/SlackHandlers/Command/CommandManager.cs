@@ -53,7 +53,7 @@ public class CommandManager
             if (strategy.CanHandle(command)) return strategy.Execute(command);
         }
 
-        return Task.FromResult(CommandStrategyUtils.SlashCommandResponse("Command not found. Type /gpt help or /gpt generate [prompt] to get started."));
+        return Task.FromResult(CommandStrategyUtils.SlashCommandResponse("Command not found. MimeType /gpt help or /gpt generate [prompt] to get started."));
     }
 
     private void AddCommandStrategy(ICommandStrategy commandStrategy)

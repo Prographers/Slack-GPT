@@ -17,10 +17,14 @@ public class GptClientResolver
 
     private readonly ParameterManager _parameterManager;
     private readonly GptDefaults _gptDefaults;
+    private readonly IServiceProvider _serviceProvider;
+    private Dictionary<string, BaseGptTool>? _tools;
 
-    public GptClientResolver(GptCustomCommands customCommands, GptDefaults gptDefaults, IUserCommandDb userCommandDb)
+    public GptClientResolver(GptCustomCommands customCommands, GptDefaults gptDefaults, IUserCommandDb userCommandDb,
+        IServiceProvider serviceProvider)
     {
         _gptDefaults = gptDefaults;
+        _serviceProvider = serviceProvider;
 
         _parameterManager = new ParameterManager(customCommands, gptDefaults, userCommandDb);
     }
@@ -32,8 +36,10 @@ public class GptClientResolver
     /// <param name="request">The GPT request.</param>
     /// <param name="files">List of files attached to this prompt</param>
     /// <returns>A ChatRequest instance.</returns>
-    public (IEnumerable<ChatMessage> Messages, ChatCompletionOptions Options, string Model) ParseRequest(
-        List<WritableMessage> chatPrompts, GptRequest request, List<ChatMessageContentPart>? files = null)
+    public (List<ChatMessage> Messages, ChatCompletionOptions Options, string Model, List<BaseGptTool> UsedTools)
+        ParseRequest(
+            List<WritableMessage> chatPrompts, GptRequest request, List<ChatMessageContentPart>? files = null,
+            IReadOnlyCollection<BaseGptTool>? tools = null)
     {
         foreach (var chatPrompt in chatPrompts)
         {
@@ -47,6 +53,7 @@ public class GptClientResolver
 
         ResolveModel(ref request);
         ResolveParameters(ref request);
+        var reqTools = ResolveTools(ref request);
 
         var requestPrompts = new List<WritableMessage>();
         requestPrompts.AddRange(chatPrompts);
@@ -61,14 +68,24 @@ public class GptClientResolver
             FrequencyPenalty = request.FrequencyPenalty,
             EndUserId = request.UserId
         };
+
+        if (!request.NoTools)
+        {
+            foreach (var tool in reqTools)
+            {
+                options.Tools.Add(BaseGptTool.ToChatTool(tool));
+            }
+        }
+
+
         chatPrompts.Last().Files = files ?? [];
-        
+
         foreach (var chatPrompt in chatPrompts)
         {
             messages.Add(chatPrompt.ToChatMessage());
         }
 
-        return (messages, options, request.Model);
+        return (messages, options, request.Model, reqTools);
     }
 
     /// <summary>
@@ -156,6 +173,51 @@ public class GptClientResolver
                 break;
             }
         } while ((match = match.NextMatch()).Success);
+    }
+
+    /// <summary>
+    ///     Resolves the tools to be used for the given input.
+    /// </summary>
+    private List<BaseGptTool> ResolveTools(ref GptRequest input)
+    {
+        if (_tools == null)
+        {
+            var tools = AppDomain.CurrentDomain
+                .GetAssemblies()
+                .SelectMany(assembly => assembly.GetTypes())
+                .Where(type => type.IsSubclassOf(typeof(BaseGptTool)))
+                .Select(type => (BaseGptTool)ActivatorUtilities.CreateInstance(_serviceProvider, type))
+                .ToList();
+
+            _tools = new Dictionary<string, BaseGptTool>();
+            foreach (var tool in tools)
+            {
+                _tools.Add(tool.Name, tool);
+            }
+        }
+
+        // Match tool to input
+        var resultTools = new List<BaseGptTool>();
+        foreach (var requestedTool in input.Tools)
+        {
+            // Check if the requested tool is in the list of tools as is
+            if (_tools.TryGetValue(requestedTool, out var tool))
+            {
+                resultTools.Add(tool);
+                continue;
+            }
+
+            foreach (var (_, value) in _tools)
+            {
+                var normalizedRequestedTool = requestedTool.GetNormalizedParameter();
+                // normalize the alias to match the requested tool
+                if (value.Aliases.All(alias => alias.GetNormalizedParameter() != normalizedRequestedTool)) continue;
+                resultTools.Add(value);
+                break;
+            }
+        }
+
+        return resultTools;
     }
 
     /// <summary>

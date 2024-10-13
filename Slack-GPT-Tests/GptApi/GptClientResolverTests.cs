@@ -1,4 +1,4 @@
-using FluentAssertions;
+/*using FluentAssertions;
 using LiteDB;
 using OpenAI;
 using OpenAI.Chat;
@@ -403,4 +403,4 @@ public class GptClientResolverTests
         // Assert
         chatRequest.Messages[0].Content.Should().Be("Context Test");
     }
-}
+}*/

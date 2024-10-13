@@ -76,6 +76,16 @@ public class GptRequest
     ///     Gets or sets the model used for generating the response.
     /// </summary>
     public string Model { get; set; } = "gpt-4o";
+    
+    /// <summary>
+    ///     Disables the use of tools in the response.
+    /// </summary>
+    public bool NoTools { get; set; }
+    
+    /// <summary>
+    ///     Gets or sets the tools to use in the response.
+    /// </summary>
+    public List<string> Tools { get; set; } = [];
 
     /// <summary>
     ///     Gets or sets the system identifier (optional).

@@ -2,12 +2,14 @@
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OpenAI;
 using OpenAI.Chat;
 using Slack_GPT_Socket.Settings;
 using Slack_GPT_Socket.Utilities.LiteDB;
 using SlackNet.Blocks;
 using SlackNet.Events;
+using ErrorEventArgs = Newtonsoft.Json.Serialization.ErrorEventArgs;
 
 namespace Slack_GPT_Socket.GptApi;
 
@@ -23,26 +25,30 @@ public class GptClient
     private readonly GptClientResolver _resolver;
     private readonly IHttpClientFactory _httpClientFactory;
 
+
     /// <summary>
     ///     Initializes a new instance of the <see cref="GptClient" /> class.
     /// </summary>
     /// <param name="customCommands">Custom commands handler</param>
     /// <param name="log">The logger instance.</param>
     /// <param name="settings">The API settings.</param>
+    /// <param name="services"></param>
     public GptClient(
         GptCustomCommands customCommands,
+        OpenAIClient api,
         IUserCommandDb userCommandDb,
         ILogger<GptClient> log,
         IOptions<GptDefaults> gptDefaults,
         IOptions<ApiSettings> settings,
-        IHttpClientFactory httpClientFactory)
+        IHttpClientFactory httpClientFactory,
+        IServiceProvider services)
     {
         _httpClientFactory = httpClientFactory;
-        _api = new OpenAIClient(settings.Value.OpenAIKey);
+        _api = api;
         _log = log;
         _settings = settings;
         _gptDefaults = gptDefaults.Value;
-        _resolver = new GptClientResolver(customCommands, _gptDefaults, userCommandDb);
+        _resolver = new GptClientResolver(customCommands, _gptDefaults, userCommandDb, services);
     }
 
     /// <summary>
@@ -62,7 +68,7 @@ public class GptClient
         prompt.Prompt = userPrompt.Content;
 
         // TODO: Refactor me!!!
-        
+
         var files = new List<ChatMessageContentPart>();
         foreach (var file in slackEvent.Files)
         {
@@ -78,7 +84,8 @@ public class GptClient
             var httpClient = _httpClientFactory.CreateClient();
             // configure httpClient to allow images and other files
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(file.Mimetype));
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _settings.Value.SlackBotToken);
+            httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", _settings.Value.SlackBotToken);
             var fileRequest = await httpClient.GetAsync(fileUrl);
             if (!fileRequest.IsSuccessStatusCode)
             {
@@ -87,17 +94,19 @@ public class GptClient
                     Error = "Requested file to process with this request, but it couldn't be downloaded successfully"
                 };
             }
+
             var fileContent = await fileRequest.Content.ReadAsStreamAsync();
             var headers = fileRequest.Content.Headers;
-            
+
             // check if headers contain the mimetype
-            if (!headers.TryGetValues("Content-Type", out var contentTypes))
+            if (!headers.TryGetValues("Content-MimeType", out var contentTypes))
             {
                 return new GptResponse
                 {
                     Error = "Requested file to process with this request, but it doesn't have a mimetype"
                 };
             }
+
             var contentType = contentTypes.FirstOrDefault();
             if (contentType == null)
             {
@@ -106,16 +115,18 @@ public class GptClient
                     Error = "Requested file to process with this request, but it doesn't have a mimetype"
                 };
             }
+
             // check if the mimetype is equal to the file mimetype
             if (contentType != file.Mimetype)
             {
                 return new GptResponse
                 {
-                    Error = "Requested file to process with this request, but the mimetype doesn't match the file mimetype " +
-                            $"expected {file.Mimetype} but got {contentType}"
+                    Error =
+                        "Requested file to process with this request, but the mimetype doesn't match the file mimetype " +
+                        $"expected {file.Mimetype} but got {contentType}"
                 };
             }
-            
+
             using var memoryStream = new MemoryStream();
             await fileContent.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
@@ -126,7 +137,7 @@ public class GptClient
         }
 
         // TODO: Refactor me!!!
-        
+
         if (slackEvent.Blocks != null)
         {
             foreach (var block in slackEvent.Blocks)
@@ -161,20 +172,76 @@ public class GptClient
         try
         {
             var sw = Stopwatch.StartNew();
-            var model = _api.GetChatClient(chatRequest.Model);
-            var result = await model.CompleteChatAsync(chatRequest.Messages, chatRequest.Options);
-            var chatCompletion = result.Value;
-            _log.LogInformation("GPT response: {Response}", JsonConvert.SerializeObject(chatCompletion));
 
-            
-            
-            return new GptResponse
+            bool requiresAction;
+            GptResponse response = new();
+            do
             {
-                Message = chatCompletion.Content.Last().Text,
-                Model = chatCompletion.Model,
-                Usage = chatCompletion.Usage,
-                ProcessingTime = sw.Elapsed
-            };
+                requiresAction = false;
+
+                var model = _api.GetChatClient(chatRequest.Model);
+                var result = await model.CompleteChatAsync(chatRequest.Messages, chatRequest.Options);
+                var completion = result.Value;
+                response.Model = completion.Model;
+                response.Usage = new TokenUsage(completion.Usage);
+                _log.LogInformation("GPT response: {Response}", JsonConvert.SerializeObject(completion));
+
+                switch (completion.FinishReason)
+                {
+                    case ChatFinishReason.Stop:
+                    {
+                        // Add the assistant message to the conversation history.
+                        chatRequest.Messages.Add(new AssistantChatMessage(completion));
+                        response.Message = completion.Content.Last().Text;
+                        break;
+                    }
+
+                    case ChatFinishReason.ToolCalls:
+                    {
+                        // First, add the assistant message with tool calls to the conversation history.
+                        chatRequest.Messages.Add(new AssistantChatMessage(completion));
+
+                        // Then, add a new tool message for each tool call that is resolved.
+                        foreach (ChatToolCall toolCall in completion.ToolCalls)
+                        {
+                            foreach (var tool in chatRequest.UsedTools)
+                            {
+                                if (tool.Name == toolCall.FunctionName)
+                                {
+                                    var settings = new JsonSerializerSettings
+                                    {
+                                        Error = HandleDeserializationError
+                                    };
+                                    var toolCallResult = await tool.CallExpressionInternal(
+                                        toolCall.FunctionArguments.ToString(),
+                                        ((s, type) => JsonConvert.DeserializeObject(s, type)));
+                                    chatRequest.Messages.Add(new ToolChatMessage(toolCall.Id, toolCallResult.TextResponse));
+                                    response.FileAttachments.AddRange(toolCallResult.Files);
+                                }
+                            }
+                        }
+
+                        requiresAction = true;
+                        break;
+                    }
+
+                    case ChatFinishReason.Length:
+                        throw new NotImplementedException(
+                            "Incomplete model output due to MaxTokens parameter or token limit exceeded.");
+
+                    case ChatFinishReason.ContentFilter:
+                        throw new NotImplementedException("Omitted content due to a content filter flag.");
+
+                    case ChatFinishReason.FunctionCall:
+                        throw new NotImplementedException("Deprecated in favor of tool calls.");
+
+                    default:
+                        throw new NotImplementedException(completion.FinishReason.ToString());
+                }
+            } while (requiresAction);
+
+            response.ProcessingTime = sw.Elapsed;
+            return response;
         }
         catch (Exception e)
         {
@@ -184,5 +251,11 @@ public class GptClient
                 Error = e.Message
             };
         }
+    }
+    
+    public void HandleDeserializationError(object sender, ErrorEventArgs errorArgs)
+    {
+        var currentError = errorArgs.ErrorContext.Error.Message;
+        errorArgs.ErrorContext.Handled = true;
     }
 }

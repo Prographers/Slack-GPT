@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using Slack_GPT_Socket.GptApi;
+using SlackNet;
 using SlackNet.Blocks;
 using SlackNet.Events;
 
@@ -65,5 +67,45 @@ public static class SlackParserUtils
         }
         
         return sb.ToString();
+    }
+
+    /// <summary>
+    ///     Attaches files to the given blocks.
+    /// </summary>
+    /// <param name="slack"></param>
+    /// <param name="blocks"></param>
+    /// <param name="response"></param>
+    /// <exception cref="NotImplementedException"></exception>
+    public static async Task AttachFilesToBlocks(ISlackApiClient slack, List<Block> blocks, GptResponse response)
+    {
+        if (response.FileAttachments.Count == 0) return;
+
+        foreach (var file in response.FileAttachments)
+        {
+            var fileUploadResponse = await slack.Files.Upload(
+                file.Data, 
+                file.MimeType, 
+                file.Name, 
+                file.Title);
+
+            if (file.IsImage)
+            {
+                blocks.Add(new ImageBlock
+                {
+                    Title = file.Title,
+                    ImageUrl = fileUploadResponse.File.Permalink,
+                    AltText = file.Title,
+                });
+            }
+            else
+            {
+                blocks.Add(new FileBlock
+                {
+                    ExternalId = fileUploadResponse.File.Id,
+                    Source = fileUploadResponse.File.Permalink,
+                    BlockId = "file_block_" + fileUploadResponse.File.Id,
+                });
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ using SlackNet.Blocks;
 using SlackNet.Events;
 using SlackNet.Interaction;
 using SlackNet.WebApi;
+using File = System.IO.File;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Slack_GPT_Socket;
@@ -87,7 +88,7 @@ public class SlackMessageEventBaseHandler
     {
         if (IsBot(slackEvent)) return;
         if (!IsBotChannel(slackEvent) && _slackSettings.OnlyMentionsOutsideBotChannel) return;
-
+        
         RemoveMentionsFromText(slackEvent);
 
         var context = await ResolveConversationContext(slackEvent);
@@ -476,18 +477,19 @@ public class SlackMessageEventBaseHandler
     ///     Posts the GPT response message to the Slack channel with additional context information.
     /// </summary>
     /// <param name="slackEvent">The MessageEventBase event.</param>
-    /// <param name="text">The GPT response containing the message and context information to post.</param>
-    private async Task PostSlackMessage(MessageEventBase slackEvent, GptResponse text)
+    /// <param name="response">The GPT response containing the message and context information to post.</param>
+    private async Task PostSlackMessage(MessageEventBase slackEvent, GptResponse response)
     {
-        var blocks = SlackParserUtils.ConvertTextToBlocks(text.Message);
+        var blocks = SlackParserUtils.ConvertTextToBlocks(response.Message);
+        await SlackParserUtils.AttachFilesToBlocks(_slack, blocks, response);
         blocks.Add(new ContextBlock
         {
             Elements = new[]
             {
                 new Markdown($"by <@{slackEvent.User}> " +
-                             $"using {text.Model} " +
-                             $"in {text.ProcessingTime:hh':'mm':'ss} " +
-                             $"with {text.Usage?.TotalTokenCount} ({text.Usage?.InputTokenCount}/{text.Usage?.OutputTokenCount}) tokens " +
+                             $"using {response.Model} " +
+                             $"in {response.ProcessingTime:hh':'mm':'ss} " +
+                             $"with {response.Usage?.TotalTokenCount} ({response.Usage?.InputTokenCount}/{response.Usage?.OutputTokenCount}) tokens " +
                              $"({Application.VersionString})")
             }
         });
@@ -495,7 +497,7 @@ public class SlackMessageEventBaseHandler
         {
             Channel = slackEvent.Channel,
             ThreadTs = slackEvent.ThreadTs ?? slackEvent.Ts,
-            Blocks = blocks
+            Blocks = blocks,
         });
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Humanizer;
 
 namespace Slack_GPT_Socket;
 
@@ -83,5 +84,25 @@ public static class StringUtils
     public static bool Contains(this string input, IEnumerable<string> values)
     {
         return values.Any(input.Contains);
+    }
+    
+    /// <summary>
+    ///     Normalizes a parameter name for better comparison.
+    /// </summary>
+    /// <param name="parameterName"></param>
+    /// <returns></returns>
+    public static string GetNormalizedParameter(this string parameterName)
+    {
+        // Remove leading '-'
+        if (parameterName.StartsWith("-")) parameterName = parameterName.Substring(1);
+
+        // Pascalize the name (converts 'no-tools', 'no_tools', 'notools' to 'NoTools')
+        parameterName = parameterName.Pascalize();
+
+        // Depluralize (converts 'NoTools' to 'NoTool')
+        var singularName = parameterName.Singularize(false);
+
+        // Convert to lower case for case-insensitive comparison
+        return singularName.ToLowerInvariant();
     }
 }

@@ -37,7 +37,9 @@ public class ParameterManager : IEnumerable<IParameterResolver>
             new SystemResolver(),
             new ContextResolver(),
             new PredefinedCommandResolver(customCommands),
-            new UsersCommandResolver(userCommandDb)
+            new UsersCommandResolver(userCommandDb),
+            new NoToolsResolver(),
+            new IncludeToolResolver()
         };
     }
 
